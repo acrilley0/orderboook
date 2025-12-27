@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <vector>
+#include <map>
 #include <memory>
 #include "Order.hpp"
 
@@ -21,8 +22,10 @@ struct Level {
 class OrderBook {
 public:
   // Buy Side and Sell Side, both with vectors of orders
-  std::vector<Level> bids;
-  std::vector<Level> asks;
+  // std::vector<Level> bids;
+  // std::vector<Level> asks;
+  std::map<double, std::vector<Order>, std::greater<double>> bids;
+  std::map<double, std::vector<Order>, std::less<double>> asks;
 
   OrderBook() {
     bids = {};
