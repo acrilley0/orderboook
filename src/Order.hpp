@@ -17,7 +17,7 @@ public:
   double price;
   u32    quantity;
   Side   side;
-  time_t timestamp; // FIXME: Convert this to a millsecond timestamp
+  u64    timestamp; // FIXME: Convert this to a millsecond timestamp
   // Order type?
   // Priority?
 

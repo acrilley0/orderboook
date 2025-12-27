@@ -10,7 +10,7 @@ typedef uint64_t u64;
 
 struct Level {
   u32 levelId;
-  std::vector<Order> orders;
+  std::vector<Order> orders; // TODO: Should this be a set instead to detect against trying to add duplicate orders?
 
   Level(u32 levelId, std::vector<Order> orders) :
     levelId(levelId),
