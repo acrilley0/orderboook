@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <vector>
 #include <map>
+#include <set>
 #include <memory>
 #include "Order.hpp"
 
@@ -11,9 +12,9 @@ typedef uint64_t u64;
 
 struct Level {
   u32 levelId;
-  std::vector<Order> orders; // TODO: Should this be a set instead to detect against trying to add duplicate orders?
+  std::set<Order> orders;
 
-  Level(u32 levelId, std::vector<Order> orders) :
+  Level(u32 levelId, std::set<Order> orders) :
     levelId(levelId),
     orders(orders)
   {}
@@ -22,8 +23,6 @@ struct Level {
 class OrderBook {
 public:
   // Buy Side and Sell Side, both with vectors of orders
-  // std::vector<Level> bids;
-  // std::vector<Level> asks;
   std::map<double, std::vector<Order>, std::greater<double>> bids;
   std::map<double, std::vector<Order>, std::less<double>> asks;
 
