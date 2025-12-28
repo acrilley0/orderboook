@@ -28,4 +28,12 @@ public:
     side(side),
     timestamp(timestamp)
   {}
+
+  bool operator<(const Order& existing) const
+  {
+    if (existing.price != price)
+      return existing.price < price;
+
+    return existing.timestamp < timestamp;
+  }
 };
