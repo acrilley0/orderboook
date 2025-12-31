@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string>
 #include <chrono>
 
 typedef int32_t  i32;
@@ -13,15 +14,17 @@ typedef enum {
 
 class Order {
 public:
-  u32    orderId;
-  double price;
-  u32    quantity;
-  Side   side;
-  u64    timestamp; // FIXME: Convert this to a millsecond timestamp
+  u32         orderId;
+  u32         quantity;
+  double      price;
+  u64         timestamp; // FIXME: Convert this to a millsecond timestamp
+  Side        side;
+  std::string symbol;
   // Order type?
   // Priority?
 
-  Order(u32 orderId, double price, u32 quantity, Side side, time_t timestamp) :
+  Order(std::string symbol, u32 orderId, double price, u32 quantity, Side side, time_t timestamp) :
+    symbol(symbol),
     orderId(orderId),
     price(price),
     quantity(quantity),

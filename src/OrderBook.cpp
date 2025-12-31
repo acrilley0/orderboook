@@ -1,10 +1,16 @@
 #include <iostream>
 #include "OrderBook.hpp"
 
-std::unique_ptr<OrderBook> OrderBook::initBook()
+std::unique_ptr<OrderBook> OrderBook::initBook(const std::string& symbol)
 {
-  std::unique_ptr<OrderBook> book_ptr = std::make_unique<OrderBook>(OrderBook());
+  std::unique_ptr<OrderBook> book_ptr = std::make_unique<OrderBook>(OrderBook(symbol));
   return book_ptr;
+}
+
+std::unique_ptr<OrderBook> getBook(const std::string& symbol)
+{
+  // If I am going to return a book based on a symbol, I likely need
+  // a list (or some other container) of OrderBook objects
 }
 
 void OrderBook::displayBook(const std::unique_ptr<OrderBook>& book)
