@@ -29,15 +29,20 @@ void OrderBook::displayBook()
   }
 }
 
-void OrderBook::addOrder(Order &order)
+bool OrderBook::addOrder(Order &order)
 {
   if (order.side == BID) {
     auto [iter, ins] = bids[order.price].insert(order);
-    if (!ins)
+    if (!ins) {
       std::cout << "Found a duplicate key, will not insert order" << std::endl;
+      return false;
+    }
   } else if (order.side == ASK) {
     auto [iter, ins] = asks[order.price].insert(order);
-    if (!ins)
+    if (!ins) {
       std::cout << "Found a duplicate key, will not insert order" << std::endl;
+      return false;
+    }
   }
+  return true;
 }

@@ -49,7 +49,7 @@ public:
   }
 
   void displayBook();
-  void addOrder(Order &order);
+  bool addOrder(Order &order);
   void modifyOrder(OrderBook &book);
   void executeOrder(OrderBook &book);
 };

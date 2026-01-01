@@ -7,7 +7,7 @@ typedef int64_t  i64;
 typedef uint64_t u64;
 
 typedef enum {
-  BID,
+  BID = 1,
   ASK,
 } Side;
 
