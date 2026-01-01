@@ -1,11 +1,11 @@
 #include "OrderBook.hpp"
+#include <unordered_map>
 #include <memory>
 
 class OrderBookManager {
-  std::set<OrderBook> books; // Only one OrderBook per symbol allowed
-  OrderBookManager() { books = {}; }
 
 public:
+  std::unordered_map<std::string, std::unique_ptr<OrderBook>> books; // Only one OrderBook per symbol allowed // FIXME: Might want to make this private and have functions for pushing new books
   std::unique_ptr<OrderBook> initBook(const std::string& symbol);
-  std::unique_ptr<OrderBook> getBook(const std::string& symbol);
+  static std::unique_ptr<OrderBook> getBook(const std::string& symbol, const OrderBookManager& bookManager);
 };

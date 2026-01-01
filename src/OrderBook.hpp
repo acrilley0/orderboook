@@ -37,13 +37,13 @@ public:
   std::map<double, std::unordered_set<Order, OrderHash, OrderEqual>, std::less<double>> asks;
 
   OrderBook(std::string symbol) {
-    symbol = symbol;
+    this->symbol = symbol;
     bids = {};
     asks = {};
   }
 
   OrderBook() {
-    symbol = "",
+    symbol = "";
     bids = {};
     asks = {};
   }

@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -Wextra -DNDEBUG")
 set(SOURCES
     src/main.cpp
     src/OrderBook.cpp
+    src/OrderBookManager.cpp
 )
 
 add_executable(orderbook ${SOURCES})
