@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <string>
-#include <chrono>
 
 typedef int32_t  i32;
 typedef uint32_t u32;
@@ -23,13 +22,18 @@ public:
   // Order type?
   // Priority?
 
-  Order(std::string symbol, u32 orderId, double price, u32 quantity, Side side, time_t timestamp) :
-    symbol(symbol),
+  Order(u32 orderId,
+        u32 quantity,
+        double price,
+        time_t timestamp,
+        Side side,
+        std::string symbol) :
     orderId(orderId),
-    price(price),
     quantity(quantity),
+    price(price),
+    timestamp(timestamp),
     side(side),
-    timestamp(timestamp)
+    symbol(symbol)
   {}
 
   bool operator<(const Order& existing) const
