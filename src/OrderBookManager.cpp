@@ -7,11 +7,11 @@ std::unique_ptr<OrderBook> OrderBookManager::initBook(const std::string& symbol)
   return book_ptr;
 }
 
-std::unique_ptr<OrderBook> OrderBookManager::getBook(const std::string& symbol, const OrderBookManager& bookManager)
+OrderBook* OrderBookManager::getBook(const std::string& symbol)
 {
-  for (auto & iter : bookManager.books) {
+  for (auto & iter : books) {
     if (iter.second->symbol == symbol) {
-      std::cout << "Found existing book with symbol " << iter.second->symbol << std::endl;
+      return iter.second.get();
     }
   }
 

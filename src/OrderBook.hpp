@@ -48,10 +48,8 @@ public:
     asks = {};
   }
 
-  std::unique_ptr<OrderBook> initBook(const std::string& symbol);
-  std::unique_ptr<OrderBook> getBook(const std::string& symbol);
-  void displayBook(const std::unique_ptr<OrderBook>& book);
-  void addOrder(Order &order, std::unique_ptr<OrderBook>& book);
+  void displayBook();
+  void addOrder(Order &order);
   void modifyOrder(OrderBook &book);
   void executeOrder(OrderBook &book);
 };
