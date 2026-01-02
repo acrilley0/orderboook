@@ -48,3 +48,30 @@ bool OrderBook::addOrder(Order &order)
 
   return true;
 }
+
+template<typename MapType>
+Order* findOrderInMap(MapType& orderMap, u32 orderId, double price, const std::string& symbol, Side side) {
+    auto iter = orderMap.find(price);
+    if (iter == orderMap.end()) {
+        return nullptr;
+    }
+
+    auto& ordersAtPrice = iter->second;
+    auto orderIter = ordersAtPrice.find(Order(orderId, 0, price, 0, side, symbol));
+    if (orderIter != ordersAtPrice.end()) {
+        return const_cast<Order*>(&(*orderIter));
+    }
+    return nullptr;
+}
+
+bool OrderBook::modifyOrder(Order &order)
+{
+  Order *orderInBook = nullptr;
+  if (order.side == BID) {
+    orderInBook = findOrderInMap(this->bids, order.orderId, order.price, order.symbol, order.side);
+  } else if (order.side == ASK) {
+    orderInBook = findOrderInMap(this->asks, order.orderId, order.price, order.symbol, order.side);
+  }
+
+  return orderInBook;
+}

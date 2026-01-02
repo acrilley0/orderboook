@@ -8,6 +8,7 @@ enum {
   CREATE_BOOK = 1,
   LIST_BOOKS,
   ADD_ORDER,
+  MODIFY_ORDER,
   DISPLAY_BOOK,
 };
 
@@ -16,7 +17,8 @@ void printOptions()
   std::cout << "1. Create an OrderBook" << std::endl;
   std::cout << "2. List symbols that currently have OrderBooks" << std::endl;
   std::cout << "3. Add an Order to an OrderBook" << std::endl;
-  std::cout << "4. Display an order book" << std::endl;
+  std::cout << "4. Modify existing order" << std::endl;
+  std::cout << "5. Display an order book" << std::endl;
 }
 
 int main()
@@ -25,8 +27,13 @@ int main()
 
   printOptions();
 
-  int choice;
   std::string symbol;
+  u32         orderId;
+  double      price;
+  int         quantity;
+  int         side;
+
+  int choice;
   while(std::cin >> choice) {
     std::cout << std::endl;
     switch (choice) {
@@ -50,13 +57,9 @@ int main()
         break;
       }
       case ADD_ORDER: {
-        double price;
-        int    quantity;
-        int    side;
-
         std::cout << "What OrderBook would you like to add an Order to?" << std::endl;
         std::cin.ignore();
-        std::getline(std::cin ,symbol);
+        std::getline(std::cin, symbol);
 
         OrderBook *book = bookManager.getBook(symbol);
         if (book == nullptr) {
@@ -71,10 +74,42 @@ int main()
         std::cout << "Enter quantity: ";
         std::cin >> quantity;
 
-        Order order = Order(1, quantity, price, 0, static_cast<Side>(side), symbol);
+        const auto time = std::chrono::system_clock::now().time_since_epoch().count();
 
-        bool added = book->addOrder(order);
+        // FIXME: Figure out how you want to generate orderIds
+        Order order = Order(1, quantity, price, time, static_cast<Side>(side), symbol);
+
+        book->addOrder(order);
         std::cout << std::endl;
+        break;
+      }
+      case MODIFY_ORDER: {
+        std::cout << "What OrderBook would you like to modify an Order in?" << std::endl;
+        std::cin.ignore();
+        std::getline(std::cin ,symbol);
+
+        OrderBook *book = bookManager.getBook(symbol);
+        if (book == nullptr) {
+          std::cout << "A book with symbol " << symbol << " does not currently exist!" << std::endl;
+          break;
+        }
+
+        std::cout << "Enter the following information for the order you want to modify:" << std::endl;
+        std::cout << "Symbol: ";
+        std::getline(std::cin, symbol);
+        std::cout << "Order ID: ";
+        std::cin >> orderId;
+        std::cout << "Price: ";
+        std::cin >> price;
+        std::cout << "Quantity: ";
+        std::cin >> quantity;
+        std::cout << "Side (1 = BUY, 2 = SELL): ";
+        std::cin >> side;
+
+        Order orderToBeModified = Order(orderId, quantity, price, 0, static_cast<Side>(side), symbol);
+
+        bool wasModified =  book->modifyOrder(orderToBeModified);
+
         break;
       }
       case DISPLAY_BOOK: {

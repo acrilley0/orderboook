@@ -14,13 +14,14 @@ private:
   struct OrderHash {
     size_t operator()(const Order& order) const {
       size_t h1 = std::hash<u32>{}(order.orderId);
-      size_t h2 = std::hash<std::string>{}(order.symbol);
-      size_t h3 = std::hash<double>{}(order.price);
+      // size_t h2 = std::hash<std::string>{}(order.symbol);
+      // size_t h3 = std::hash<bool>{}(order.side);
 
       /* An order's uniqueness is a combination of it's
-       * ID, the symbol it corresponds to, and its price
+       * ID, the symbol it corresponds to, and its side
        */
-      return h1 ^ (h2 << 1) ^ (h3 << 2);
+      // return h1 ^ (h2 << 1) ^ (h3 << 2);
+      return h1;
     }
   };
 
@@ -31,7 +32,6 @@ private:
   };
 
 public:
-  // Buy Side and Sell Side, both with vectors of orders
   std::string symbol;
   std::map<double, std::unordered_set<Order, OrderHash, OrderEqual>, std::greater<double>> bids;
   std::map<double, std::unordered_set<Order, OrderHash, OrderEqual>, std::less<double>> asks;
@@ -50,6 +50,7 @@ public:
 
   void displayBook();
   bool addOrder(Order &order);
-  void modifyOrder(OrderBook &book);
+  // Order *getOrder(u32 orderId, std::string symbol, u32 price, bool side, OrderBook &book);
+  bool modifyOrder(Order &order);
   void executeOrder(OrderBook &book);
 };
