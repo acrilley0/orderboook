@@ -6,6 +6,7 @@
 
 enum {
   CREATE_BOOK = 1,
+  LIST_BOOKS,
   ADD_ORDER,
   DISPLAY_BOOK,
 };
@@ -13,8 +14,9 @@ enum {
 void printOptions()
 {
   std::cout << "1. Create an OrderBook" << std::endl;
-  std::cout << "2. Add an Order to an OrderBook" << std::endl;
-  std::cout << "3. Display an order book" << std::endl;
+  std::cout << "2. List symbols that currently have OrderBooks" << std::endl;
+  std::cout << "3. Add an Order to an OrderBook" << std::endl;
+  std::cout << "4. Display an order book" << std::endl;
 }
 
 int main()
@@ -26,6 +28,7 @@ int main()
   int choice;
   std::string symbol;
   while(std::cin >> choice) {
+    std::cout << std::endl;
     switch (choice) {
       case CREATE_BOOK: {
         std::cout << "Please enter the symbol for the new OrderBook" << std::endl;
@@ -35,6 +38,15 @@ int main()
         std::unique_ptr<OrderBook> book = bookManager.initBook(symbol);
         bookManager.books.insert({symbol, std::move(book)});
         std::cout << std::endl;
+        break;
+      }
+      case LIST_BOOKS: {
+        if (!bookManager.books.size())
+          std::cout << "There are currently 0 orderbooks." << std::endl;
+
+        for (auto & iter : bookManager.books) {
+          std::cout << iter.second->symbol << std::endl;
+        }
         break;
       }
       case ADD_ORDER: {
@@ -82,6 +94,7 @@ int main()
         std::cout << "Invalid action!" << std::endl;
         break;
     }
+    std::cout << std::endl;
     printOptions();
   }
 

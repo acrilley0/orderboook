@@ -44,5 +44,7 @@ bool OrderBook::addOrder(Order &order)
       return false;
     }
   }
+  std::cout << "Order was successfully added!" << std::endl;
+
   return true;
 }
