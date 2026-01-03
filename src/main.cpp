@@ -43,8 +43,15 @@ int main()
         std::getline(std::cin, symbol);
 
         std::unique_ptr<OrderBook> book = bookManager.initBook(symbol);
-        bookManager.books.insert({symbol, std::move(book)});
+        auto [iter, inserted] = bookManager.books.insert({symbol, std::move(book)});
+        if (!inserted) {
+          std::cout << "Error detected while trying to insert book!" << std::endl;
+        }
+
+        std::cout << "OrderBook successfully created for symbol " << symbol;
+
         std::cout << std::endl;
+
         break;
       }
       case LIST_BOOKS: {
@@ -54,6 +61,7 @@ int main()
         for (auto & iter : bookManager.books) {
           std::cout << iter.second->symbol << std::endl;
         }
+
         break;
       }
       case ADD_ORDER: {
@@ -77,10 +85,12 @@ int main()
         const auto time = std::chrono::system_clock::now().time_since_epoch().count();
 
         // FIXME: Figure out how you want to generate orderIds
-        Order order = Order(1, quantity, price, time, static_cast<Side>(side), symbol);
 
-        book->addOrder(order);
+        std::shared_ptr<Order> orderp = std::make_shared<Order>(1, quantity, price, time, static_cast<Side>(side), symbol);
+
+        book->addOrder(orderp);
         std::cout << std::endl;
+
         break;
       }
       case MODIFY_ORDER: {
@@ -94,21 +104,14 @@ int main()
           break;
         }
 
-        std::cout << "Enter the following information for the order you want to modify:" << std::endl;
-        std::cout << "Symbol: ";
-        std::getline(std::cin, symbol);
-        std::cout << "Order ID: ";
+        std::cout << "Enter the order ID for the order you wish to modify:";
         std::cin >> orderId;
-        std::cout << "Price: ";
-        std::cin >> price;
-        std::cout << "Quantity: ";
-        std::cin >> quantity;
-        std::cout << "Side (1 = BUY, 2 = SELL): ";
-        std::cin >> side;
 
-        Order orderToBeModified = Order(orderId, quantity, price, 0, static_cast<Side>(side), symbol);
-
-        bool wasModified =  book->modifyOrder(orderToBeModified);
+        Order *order = book->getOrder(orderId);
+        if (order == nullptr) {
+          std::cout << "An order with the ID " << orderId << " does not currently exist!" << std::endl;
+          break;
+        }
 
         break;
       }
@@ -116,6 +119,7 @@ int main()
         std::cout << "Which symbol would you like to display the book for?" << std::endl;
         std::cin.ignore();
         std::getline(std::cin, symbol);
+
         OrderBook *book = bookManager.getBook(symbol);
         if (book) {
           book->displayBook();
@@ -123,12 +127,15 @@ int main()
           std::cout << "A book for the symbol " << symbol << " does not currently exist!";
         }
         std::cout << std::endl;
+
         break;
       }
       default:
         std::cout << "Invalid action!" << std::endl;
+
         break;
     }
+
     std::cout << std::endl;
     printOptions();
   }

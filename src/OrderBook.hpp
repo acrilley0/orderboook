@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <map>
 #include <unordered_set>
+#include <unordered_map>
 #include <memory>
 #include "Order.hpp"
 
@@ -11,9 +12,9 @@ typedef uint64_t u64;
 
 class OrderBook {
 private:
-  struct OrderHash {
-    size_t operator()(const Order& order) const {
-      size_t h1 = std::hash<u32>{}(order.orderId);
+  struct OrderPtrHash {
+    size_t operator()(const std::shared_ptr<Order>& order) const {
+      size_t h1 = std::hash<u32>{}(order->orderId);
       // size_t h2 = std::hash<std::string>{}(order.symbol);
       // size_t h3 = std::hash<bool>{}(order.side);
 
@@ -25,16 +26,19 @@ private:
     }
   };
 
-  struct OrderEqual {
-    bool operator()(const Order& lhs, const Order& rhs) const {
-      return lhs.orderId == rhs.orderId;
+  struct OrderPtrEqual {
+    bool operator()(const std::shared_ptr<Order>& lhs, const std::shared_ptr<Order>& rhs) const {
+      return lhs->orderId == rhs->orderId;
     }
   };
 
 public:
   std::string symbol;
-  std::map<double, std::unordered_set<Order, OrderHash, OrderEqual>, std::greater<double>> bids;
-  std::map<double, std::unordered_set<Order, OrderHash, OrderEqual>, std::less<double>> asks;
+
+  std::unordered_map<u32 /* orderId */, std::shared_ptr<Order>> globalOrderIndex;
+
+  std::map<double, std::unordered_set<std::shared_ptr<Order>, OrderPtrHash, OrderPtrEqual>, std::greater<double>> bids;
+  std::map<double, std::unordered_set<std::shared_ptr<Order>, OrderPtrHash, OrderPtrEqual>, std::less<double>> asks;
 
   OrderBook(std::string symbol) {
     this->symbol = symbol;
@@ -48,9 +52,9 @@ public:
     asks = {};
   }
 
-  void displayBook();
-  bool addOrder(Order &order);
-  // Order *getOrder(u32 orderId, std::string symbol, u32 price, bool side, OrderBook &book);
-  bool modifyOrder(Order &order);
-  void executeOrder(OrderBook &book);
+  void   displayBook();
+  bool   addOrder(std::shared_ptr<Order>& order);
+  Order* getOrder(u32 orderId);
+  bool   modifyOrder(Order &order);
+  void   executeOrder(OrderBook &book);
 };
