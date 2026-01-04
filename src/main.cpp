@@ -10,7 +10,7 @@
 #include <chrono>
 #include <iostream>
 
-#define STYLE ftxui::center | ftxui::border | ftxui::color(ftxui::Color::Blue)
+#define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50) | ftxui::center
 
 enum class Action {
   CREATE_BOOK,
@@ -28,6 +28,30 @@ enum class Page {
   MODIFY_ORDER_PAGE,
   DISPLAY_BOOK_PAGE
 };
+
+ftxui::Component createSuccessModal(bool& successModalShown)
+{
+  return ftxui::Container::Vertical({
+    ftxui::Renderer([&] {
+      return ftxui::vbox({
+        ftxui::text("Successfully created book!"),
+      }) | STYLE;
+    }),
+    ftxui::Button("OK", [&] { successModalShown = false; }) | STYLE
+  }) | STYLE;
+}
+
+ftxui::Component createFailureModal(bool& failureModalShown)
+{
+  return ftxui::Container::Vertical({
+    ftxui::Renderer([&] {
+      return ftxui::vbox({
+        ftxui::text("Failed to create book!"),
+      }) | ftxui::center | ftxui::border | ftxui::color(ftxui::Color::Red);
+    }),
+    ftxui::Button("OK", [&] { failureModalShown = false; }),
+  });
+}
 
 int main()
 {
@@ -60,15 +84,17 @@ int main()
 
   // Page 1: Create Book
   std::string symbol;
-  OrderBook* bookp;
+  // OrderBook* bookp;
   bool inserted;
   ftxui::InputOption inputOption;
-  bool successModalShown = false;
+  bool successModalShown,failureModalShown = false;
   inputOption.on_enter = [&] {
     if (!symbol.empty()) {
       inserted = bookManager.initBook(symbol);
       if (inserted) {
         successModalShown = true;
+      } else {
+        failureModalShown = true;
       }
       symbol.clear();
     }
@@ -100,15 +126,6 @@ int main()
     createBookWithBack,
   }, &currentPage);
 
-  auto successModal = ftxui::Container::Vertical({
-    ftxui::Renderer([&] {
-      return ftxui::vbox({
-        ftxui::text("Successfully created book!"),
-      }) | STYLE;
-    }),
-    ftxui::Button("OK", [&] { successModalShown = false; }) | STYLE
-  }) | STYLE;
-
   auto finalContainer = ftxui::CatchEvent(allTabs, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape) {
       currentPage = 0; // Return to main menu
@@ -117,7 +134,10 @@ int main()
     return false;
   });
 
-  finalContainer |= ftxui::Modal(successModal, &successModalShown);
+  finalContainer |=
+    ftxui::Modal(createSuccessModal(successModalShown), &successModalShown);
+  finalContainer |=
+    ftxui::Modal(createFailureModal(failureModalShown), &failureModalShown);
 
   screen.Loop(finalContainer);
 
