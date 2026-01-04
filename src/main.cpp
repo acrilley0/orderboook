@@ -1,144 +1,106 @@
 #include "OrderBookManager.hpp"
+#include <cstdlib>
+#include <ftxui/component/component.hpp>
+#include <ftxui/component/component_options.hpp>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/dom/elements.hpp>
+#include <ftxui/screen/color.hpp>
+#include <ftxui/util/ref.hpp>
 #include <memory>
-#include <array>
 #include <chrono>
 #include <iostream>
 
-enum {
-  CREATE_BOOK = 1,
+#define STYLE ftxui::center | ftxui::border | ftxui::color(ftxui::Color::Blue)
+
+enum class Action {
+  CREATE_BOOK,
   LIST_BOOKS,
   ADD_ORDER,
   MODIFY_ORDER,
   DISPLAY_BOOK,
 };
 
-void printOptions()
-{
-  std::cout << "1. Create an OrderBook" << std::endl;
-  std::cout << "2. List symbols that currently have OrderBooks" << std::endl;
-  std::cout << "3. Add an Order to an OrderBook" << std::endl;
-  std::cout << "4. Modify existing order" << std::endl;
-  std::cout << "5. Display an order book" << std::endl;
-}
+enum class Page {
+  MAIN_MENU,
+  CREATE_BOOK_PAGE,
+  LIST_BOOKS_PAGE,
+  ADD_ORDER_PAGE,
+  MODIFY_ORDER_PAGE,
+  DISPLAY_BOOK_PAGE
+};
 
 int main()
 {
   OrderBookManager bookManager = OrderBookManager();
 
-  printOptions();
+  auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-  std::string symbol;
-  u32         orderId;
-  double      price;
-  int         quantity;
-  int         side;
+  const std::vector<std::string> options = {
+    "1. Create an OrderBook",
+    "2. List symbols that currently have OrderBooks",
+    "3. Add an Order to an OrderBook",
+    "4. Modify existing order",
+    "5. Display an order book",
+  };
 
-  int choice;
-  while(std::cin >> choice) {
-    std::cout << std::endl;
-    switch (choice) {
-      case CREATE_BOOK: {
-        std::cout << "Please enter the symbol for the new OrderBook" << std::endl;
-        std::cin.ignore();
-        std::getline(std::cin, symbol);
+  // Main Menu
+  int currentPage = 0;
+  int menuOptionSelected = 0;
 
-        std::unique_ptr<OrderBook> book = bookManager.initBook(symbol);
-        auto [iter, inserted] = bookManager.books.insert({symbol, std::move(book)});
-        if (!inserted) {
-          std::cout << "Error detected while trying to insert book!" << std::endl;
-        }
-
-        std::cout << "OrderBook successfully created for symbol " << symbol;
-
-        std::cout << std::endl;
-
-        break;
-      }
-      case LIST_BOOKS: {
-        if (!bookManager.books.size())
-          std::cout << "There are currently 0 orderbooks." << std::endl;
-
-        for (auto & iter : bookManager.books) {
-          std::cout << iter.second->symbol << std::endl;
-        }
-
-        break;
-      }
-      case ADD_ORDER: {
-        std::cout << "What OrderBook would you like to add an Order to?" << std::endl;
-        std::cin.ignore();
-        std::getline(std::cin, symbol);
-
-        OrderBook *book = bookManager.getBook(symbol);
-        if (book == nullptr) {
-          std::cout << "A book with symbol " << symbol << " does not currently exist!" << std::endl;
-          break;
-        }
-
-        std::cout << "Enter side (1 = BUY, 2 = SELL): ";
-        std::cin >> side;
-        std::cout << "Enter price: ";
-        std::cin >> price;
-        std::cout << "Enter quantity: ";
-        std::cin >> quantity;
-
-        const auto time = std::chrono::system_clock::now().time_since_epoch().count();
-
-        // FIXME: Figure out how you want to generate orderIds
-
-        std::shared_ptr<Order> orderp = std::make_shared<Order>(1, quantity, price, time, static_cast<Side>(side), symbol);
-
-        book->addOrder(orderp);
-        std::cout << std::endl;
-
-        break;
-      }
-      case MODIFY_ORDER: {
-        std::cout << "What OrderBook would you like to modify an Order in?" << std::endl;
-        std::cin.ignore();
-        std::getline(std::cin ,symbol);
-
-        OrderBook *book = bookManager.getBook(symbol);
-        if (book == nullptr) {
-          std::cout << "A book with symbol " << symbol << " does not currently exist!" << std::endl;
-          break;
-        }
-
-        std::cout << "Enter the order ID for the order you wish to modify:";
-        std::cin >> orderId;
-
-        Order *order = book->getOrder(orderId);
-        if (order == nullptr) {
-          std::cout << "An order with the ID " << orderId << " does not currently exist!" << std::endl;
-          break;
-        }
-
-        break;
-      }
-      case DISPLAY_BOOK: {
-        std::cout << "Which symbol would you like to display the book for?" << std::endl;
-        std::cin.ignore();
-        std::getline(std::cin, symbol);
-
-        OrderBook *book = bookManager.getBook(symbol);
-        if (book) {
-          book->displayBook();
-        } else {
-          std::cout << "A book for the symbol " << symbol << " does not currently exist!";
-        }
-        std::cout << std::endl;
-
-        break;
-      }
-      default:
-        std::cout << "Invalid action!" << std::endl;
-
-        break;
+  ftxui::MenuOption menuOption;
+  menuOption.on_enter = [&] {
+    switch (menuOptionSelected) {
+      case 0: currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
+      case 1: currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE); break;
     }
+  };
+  menuOption.Vertical();
 
-    std::cout << std::endl;
-    printOptions();
-  }
+  auto mainMenu = ftxui::Menu(&options, &menuOptionSelected, menuOption) | STYLE;
 
-  return 0;
+  // Page 1: Create Book
+  std::string symbol;
+  ftxui::InputOption inputOption;
+  inputOption.on_enter = [&] {
+    if (!symbol.empty()) {
+      bookManager.initBook(symbol);
+      symbol.clear();
+    }
+  };
+  auto inputSymbol = ftxui::Input(&symbol, "Enter symbol: ", inputOption);
+  auto createBookPage = ftxui::Container::Vertical({inputSymbol});
+
+  // Switch between components based on selectedTab
+  auto tabContainer = ftxui::Container::Tab({
+    mainMenu,
+    createBookPage,
+  }, &currentPage);
+
+  auto mainWithBack = ftxui::Container::Vertical({
+    ftxui::Renderer([] { return ftxui::text("Press [ESC] to return to the menu");} ),
+    mainMenu,
+  });
+
+  auto createBookWithBack = ftxui::Renderer(createBookPage, [&] {
+    return ftxui::vbox({
+      inputSymbol->Render(),
+    }) | STYLE;
+  });
+
+  auto allTabs = ftxui::Container::Tab({
+    mainWithBack,
+    createBookWithBack,
+  }, &currentPage);
+
+  auto finalContainer = ftxui::CatchEvent(allTabs, [&](ftxui::Event event) {
+    if (event == ftxui::Event::Escape) {
+      currentPage = 0; // Return to main menu
+      return true;
+    }
+    return false;
+  });
+
+  screen.Loop(finalContainer);
+
+  return EXIT_SUCCESS;
 }

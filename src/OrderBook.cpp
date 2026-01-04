@@ -65,9 +65,9 @@ Order* findOrderInMap(MapType& orderMap, u32 orderId) {
 
 Order* OrderBook::getOrder(u32 orderId)
 {
-  return findOrderInMap(globalOrderIndex, orderId);
+  return globalOrderIndex[orderId].get();
 }
 
-bool OrderBook::modifyOrder(Order &order)
+bool OrderBook::modifyOrder(Order& order)
 {
 }

@@ -12,6 +12,8 @@ typedef uint64_t u64;
 
 class OrderBook {
 private:
+  std::unordered_map<u32 /* orderId */, std::shared_ptr<Order>> globalOrderIndex;
+
   struct OrderPtrHash {
     size_t operator()(const std::shared_ptr<Order>& order) const {
       size_t h1 = std::hash<u32>{}(order->orderId);
@@ -35,7 +37,6 @@ private:
 public:
   std::string symbol;
 
-  std::unordered_map<u32 /* orderId */, std::shared_ptr<Order>> globalOrderIndex;
 
   std::map<double, std::unordered_set<std::shared_ptr<Order>, OrderPtrHash, OrderPtrEqual>, std::greater<double>> bids;
   std::map<double, std::unordered_set<std::shared_ptr<Order>, OrderPtrHash, OrderPtrEqual>, std::less<double>> asks;
@@ -55,6 +56,6 @@ public:
   void   displayBook();
   bool   addOrder(std::shared_ptr<Order>& order);
   Order* getOrder(u32 orderId);
-  bool   modifyOrder(Order &order);
-  void   executeOrder(OrderBook &book);
+  bool   modifyOrder(Order& order);
+  void   executeOrder(OrderBook& book);
 };
