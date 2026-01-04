@@ -43,15 +43,15 @@ int main()
     "5. Display an order book",
   };
 
-  // Main Menu
+  // Page 0: Main Menu
   int currentPage = 0;
   int menuOptionSelected = 0;
 
   ftxui::MenuOption menuOption;
   menuOption.on_enter = [&] {
     switch (menuOptionSelected) {
-      case 0: currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
-      case 1: currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE); break;
+      case static_cast<int>(Action::CREATE_BOOK): currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
+      case static_cast<int>(Action::LIST_BOOKS): currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE); break;
     }
   };
   menuOption.Vertical();
@@ -60,15 +60,23 @@ int main()
 
   // Page 1: Create Book
   std::string symbol;
+  OrderBook* bookp;
+  bool inserted;
   ftxui::InputOption inputOption;
+  bool successModalShown = false;
   inputOption.on_enter = [&] {
     if (!symbol.empty()) {
-      bookManager.initBook(symbol);
+      inserted = bookManager.initBook(symbol);
+      if (inserted) {
+        successModalShown = true;
+      }
       symbol.clear();
     }
   };
   auto inputSymbol = ftxui::Input(&symbol, "Enter symbol: ", inputOption);
   auto createBookPage = ftxui::Container::Vertical({inputSymbol});
+
+  // Page 2: List Books
 
   // Switch between components based on selectedTab
   auto tabContainer = ftxui::Container::Tab({
@@ -92,6 +100,15 @@ int main()
     createBookWithBack,
   }, &currentPage);
 
+  auto successModal = ftxui::Container::Vertical({
+    ftxui::Renderer([&] {
+      return ftxui::vbox({
+        ftxui::text("Successfully created book!"),
+      }) | STYLE;
+    }),
+    ftxui::Button("OK", [&] { successModalShown = false; }) | STYLE
+  }) | STYLE;
+
   auto finalContainer = ftxui::CatchEvent(allTabs, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape) {
       currentPage = 0; // Return to main menu
@@ -99,6 +116,8 @@ int main()
     }
     return false;
   });
+
+  finalContainer |= ftxui::Modal(successModal, &successModalShown);
 
   screen.Loop(finalContainer);
 
