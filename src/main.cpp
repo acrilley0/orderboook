@@ -18,34 +18,13 @@ int main()
   // Page 1: Create Book
   std::string symbol;
   bool inserted = false;
-  ftxui::InputOption inputOption;
   bool successModalShown = false;
   bool failureModalShown = false;
-  auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
-  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown, inputOption);
+  auto bookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown);
 
   // Page 2: List Books
   int s = 0;
   auto bookListPage = ftxui::Menu(&symbols, &s, ftxui::MenuOption::Vertical());
-
-  // Switch between components based on selectedTab
-  auto tabContainer = ftxui::Container::Tab({
-    mainMenu,
-    createBookPage,
-    bookListPage,
-  }, &currentPage);
-
-  auto mainWithBack = ftxui::Container::Vertical({
-    ftxui::Renderer([] { return ftxui::text("Welcome to the OrderBook"); } ) | ftxui::center | ftxui::color(ftxui::Color::Blue),
-    mainMenu,
-  });
-
-  auto createBookWithBack = ftxui::Renderer(createBookPage, [&] {
-    return ftxui::hbox({
-      ftxui::text("Symbol: "),
-      inputSymbol->Render() | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50),
-    }) | STYLE;
-  });
 
   auto listBookWithBack = ftxui::Container::Vertical({
       ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks:"); }),
@@ -53,8 +32,8 @@ int main()
   }) | STYLE;
 
   auto allTabs = ftxui::Container::Tab({
-    mainWithBack,
-    createBookWithBack,
+    mainMenu,
+    bookPage,
     listBookWithBack,
   }, &currentPage);
   auto withModals = allTabs;

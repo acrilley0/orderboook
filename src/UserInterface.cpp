@@ -1,6 +1,8 @@
 #include "UserInterface.hpp"
+#include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
+#include <ftxui/dom/node.hpp>
 
 ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManager, int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
 {
@@ -21,11 +23,16 @@ ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManag
   menuOption.Vertical();
 
   auto mainMenu = ftxui::Menu(&options, &menuOptionSelected, menuOption) | STYLE;
-  return mainMenu;
+
+  return ftxui::Container::Vertical({
+    ftxui::Renderer([] { return ftxui::text("Welcome to the OrderBook"); }) | ftxui::center | ftxui::color(ftxui::Color::Blue),
+    mainMenu,
+  });
 }
 
-ftxui::Component UserInterface::createBookPage(OrderBookManager &bookManager, std::string &symbol, bool& inserted, bool& successModalShown, bool& failureModalShown, ftxui::InputOption inputOption)
+ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager, std::string& symbol, bool& inserted, bool& successModalShown, bool& failureModalShown)
 {
+  ftxui::InputOption inputOption;
   inputOption.on_enter = [&] {
     if (!symbol.empty()) {
       inserted = bookManager.initBook(symbol);
@@ -39,7 +46,14 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager &bookManager, st
     // FIXME: Figure out how not to create a book for an empty symbol
   };
   auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
-  return ftxui::Container::Vertical({inputSymbol});
+  auto labeledInput = ftxui::Container::Horizontal({
+    ftxui::Renderer([] { return ftxui::text("Symbol: "); }),
+    inputSymbol,
+  });
+  labeledInput->SetActiveChild(inputSymbol); // By default the active child would be the rendered text Element, so set it to the input manually
+  labeledInput |= STYLE;
+
+  return labeledInput;
 }
 
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)
