@@ -31,18 +31,16 @@ enum class Page {
 
 ftxui::Component createResultModal(bool result, const std::string& message) {
   ftxui::Element msg;
-  if (result)
     msg = ftxui::vbox({ ftxui::text(message) }) |
       ftxui::center |
       ftxui::border |
-      ftxui::color(ftxui::Color::Green) |
       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
-  else
-    msg = ftxui::vbox({ ftxui::text(message) }) |
-      ftxui::center |
-      ftxui::border |
-      ftxui::color(ftxui::Color::Red) |
-      ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
+
+  if (result) {
+    msg |= ftxui::color(ftxui::Color::Green);
+  } else {
+    msg |= ftxui::color(ftxui::Color::Red);
+  }
 
   auto msgToDisplay = ftxui::Container::Vertical({
     ftxui::Renderer([msg] {
@@ -106,6 +104,7 @@ int main()
       }
       symbol.clear();
     }
+    // FIXME: Figure out how not to create a book for an empty symbol
   };
   auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
   auto createBookPage = ftxui::Container::Vertical({inputSymbol});
@@ -144,8 +143,8 @@ int main()
     listBookWithBack,
   }, &currentPage);
   auto withModals = allTabs;
-  withModals |= ftxui::Modal(createResultModal(successModalShown, "Book was created!"), &successModalShown);
-  withModals |= ftxui::Modal(createResultModal(failureModalShown, "Failed to create book!"), &failureModalShown);
+  withModals |= ftxui::Modal(createResultModal(true, "Book was created!"), &successModalShown);
+  withModals |= ftxui::Modal(createResultModal(false, "Failed to create book!"), &failureModalShown);
 
   auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape && !successModalShown && !failureModalShown) {
