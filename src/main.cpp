@@ -29,27 +29,28 @@ enum class Page {
   DISPLAY_BOOK_PAGE
 };
 
-ftxui::Component createResultModal(bool& shown, bool result, const std::string& message) {
-  ftxui::Element displayedMsg;
+ftxui::Component createResultModal(bool result, const std::string& message) {
+  ftxui::Element msg;
   if (result)
-    displayedMsg = ftxui::vbox({ ftxui::text(message) }) |
+    msg = ftxui::vbox({ ftxui::text(message) }) |
       ftxui::center |
       ftxui::border |
       ftxui::color(ftxui::Color::Green) |
       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
   else
-    displayedMsg = ftxui::vbox({ ftxui::text(message) }) |
+    msg = ftxui::vbox({ ftxui::text(message) }) |
       ftxui::center |
       ftxui::border |
       ftxui::color(ftxui::Color::Red) |
       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
 
-  return ftxui::Container::Vertical({
-    ftxui::Renderer([displayedMsg] {
-      return displayedMsg;
+  auto msgToDisplay = ftxui::Container::Vertical({
+    ftxui::Renderer([msg] {
+      return msg;
     }),
-    ftxui::Button("OK", [&shown] { shown = false; }) | STYLE
   }) | ftxui::center;
+
+  return msgToDisplay;
 }
 
 int main()
@@ -142,19 +143,28 @@ int main()
     createBookWithBack,
     listBookWithBack,
   }, &currentPage);
+  auto withModals = allTabs;
+  withModals |= ftxui::Modal(createResultModal(successModalShown, "Book was created!"), &successModalShown);
+  withModals |= ftxui::Modal(createResultModal(failureModalShown, "Failed to create book!"), &failureModalShown);
 
-  auto finalContainer = ftxui::CatchEvent(allTabs, [&](ftxui::Event event) {
-    if (event == ftxui::Event::Escape) {
+  auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
+    if (event == ftxui::Event::Escape && !successModalShown && !failureModalShown) {
       currentPage = 0; // Return to main menu
       return true;
     }
+    if (event == ftxui::Event::Return) {
+      if (successModalShown) {
+        successModalShown = false;
+        return true;
+      }
+      if (failureModalShown) {
+        failureModalShown = false;
+        return true;
+      }
+      return false;
+    }
     return false;
   });
-
-  finalContainer |=
-    ftxui::Modal(createResultModal(successModalShown, true, "Book was created!"), &successModalShown);
-  finalContainer |=
-    ftxui::Modal(createResultModal(failureModalShown, false, "Failure to create book!"), &failureModalShown);
 
   screen.Loop(finalContainer);
 
