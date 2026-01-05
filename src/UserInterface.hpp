@@ -37,5 +37,6 @@ const std::vector<std::string> options = {
 class UserInterface {
 public:
   static ftxui::Component createMainMenu(const OrderBookManager& bookManager, int& currentPage, int& menuOptionSelected, std::vector<std::string>& symbols);
+  static ftxui::Component createBookPage(OrderBookManager& bookManager, std::string& symbol, bool& inserted, bool& successModalShown, bool& failureModalShown, ftxui::InputOption inputOption);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };

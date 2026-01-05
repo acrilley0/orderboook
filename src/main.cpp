@@ -17,24 +17,12 @@ int main()
 
   // Page 1: Create Book
   std::string symbol;
-  bool inserted;
+  bool inserted = false;
   ftxui::InputOption inputOption;
   bool successModalShown = false;
   bool failureModalShown = false;
-  inputOption.on_enter = [&] {
-    if (!symbol.empty()) {
-      inserted = bookManager.initBook(symbol);
-      if (inserted) {
-        successModalShown = true;
-      } else {
-        failureModalShown = true;
-      }
-      symbol.clear();
-    }
-    // FIXME: Figure out how not to create a book for an empty symbol
-  };
   auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
-  auto createBookPage = ftxui::Container::Vertical({inputSymbol});
+  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown, inputOption);
 
   // Page 2: List Books
   int s = 0;
