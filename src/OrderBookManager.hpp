@@ -1,11 +1,14 @@
 #include "OrderBook.hpp"
 #include <unordered_map>
 #include <memory>
+#include <vector>
 
 class OrderBookManager {
+private:
+  std::unordered_map<std::string, std::unique_ptr<OrderBook>> books;
 
 public:
-  std::unordered_map<std::string, std::unique_ptr<OrderBook>> books; // Only one OrderBook per symbol allowed // FIXME: Might want to make this private and have functions for pushing new books
   bool initBook(const std::string& symbol);
   OrderBook* getBook(const std::string& symbol);
+  std::vector<std::string> getSymbols() const; // This trailing const indicates that this method will not alter the object which calls it
 };

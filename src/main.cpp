@@ -46,7 +46,7 @@ ftxui::Component createFailureModal(bool& failureModalShown)
   return ftxui::Container::Vertical({
     ftxui::Renderer([&] {
       return ftxui::vbox({
-        ftxui::text("Failed to create book!"),
+        ftxui::text("A book with that symbol already exists!"),
       }) | ftxui::center | ftxui::border | ftxui::color(ftxui::Color::Red);
     }),
     ftxui::Button("OK", [&] { failureModalShown = false; }),
@@ -71,11 +71,19 @@ int main()
   int currentPage = 0;
   int menuOptionSelected = 0;
 
+  std::vector<std::string> symbols;
   ftxui::MenuOption menuOption;
   menuOption.on_enter = [&] {
     switch (menuOptionSelected) {
       case static_cast<int>(Action::CREATE_BOOK): currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
-      case static_cast<int>(Action::LIST_BOOKS): currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE); break;
+      case static_cast<int>(Action::LIST_BOOKS): {
+        symbols = bookManager.getSymbols();
+        if (symbols.size())
+          currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE);
+        else
+          // FIXME: Make an error popup saying there are currently no books
+        break;
+      }
     }
   };
   menuOption.Vertical();
@@ -84,10 +92,10 @@ int main()
 
   // Page 1: Create Book
   std::string symbol;
-  // OrderBook* bookp;
   bool inserted;
   ftxui::InputOption inputOption;
-  bool successModalShown,failureModalShown = false;
+  bool successModalShown = false;
+  bool failureModalShown = false;
   inputOption.on_enter = [&] {
     if (!symbol.empty()) {
       inserted = bookManager.initBook(symbol);
@@ -103,15 +111,18 @@ int main()
   auto createBookPage = ftxui::Container::Vertical({inputSymbol});
 
   // Page 2: List Books
+  int s = 0;
+  auto bookListPage = ftxui::Menu(&symbols, &s, ftxui::MenuOption::Vertical());
 
   // Switch between components based on selectedTab
   auto tabContainer = ftxui::Container::Tab({
     mainMenu,
     createBookPage,
+    bookListPage,
   }, &currentPage);
 
   auto mainWithBack = ftxui::Container::Vertical({
-    ftxui::Renderer([] { return ftxui::text("Press [ESC] to return to the menu");} ),
+    ftxui::Renderer([] { return ftxui::text("Welcome to the OrderBook"); } ) | ftxui::center | ftxui::color(ftxui::Color::Blue),
     mainMenu,
   });
 
@@ -121,9 +132,15 @@ int main()
     }) | STYLE;
   });
 
+  auto listBookWithBack = ftxui::Container::Vertical({
+      ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks:"); }),
+      bookListPage,
+  }) | STYLE;
+
   auto allTabs = ftxui::Container::Tab({
     mainWithBack,
     createBookWithBack,
+    listBookWithBack,
   }, &currentPage);
 
   auto finalContainer = ftxui::CatchEvent(allTabs, [&](ftxui::Event event) {
