@@ -1,55 +1,8 @@
-#include "OrderBookManager.hpp"
+#include "UserInterface.hpp"
 #include <cstdlib>
-#include <ftxui/component/component.hpp>
-#include <ftxui/component/component_options.hpp>
-#include <ftxui/component/screen_interactive.hpp>
-#include <ftxui/dom/elements.hpp>
-#include <ftxui/screen/color.hpp>
-#include <ftxui/util/ref.hpp>
 #include <memory>
 #include <chrono>
 #include <iostream>
-
-#define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50) | ftxui::center
-
-enum class Action {
-  CREATE_BOOK,
-  LIST_BOOKS,
-  ADD_ORDER,
-  MODIFY_ORDER,
-  DISPLAY_BOOK,
-};
-
-enum class Page {
-  MAIN_MENU,
-  CREATE_BOOK_PAGE,
-  LIST_BOOKS_PAGE,
-  ADD_ORDER_PAGE,
-  MODIFY_ORDER_PAGE,
-  DISPLAY_BOOK_PAGE
-};
-
-ftxui::Component createResultModal(bool result, const std::string& message) {
-  ftxui::Element msg;
-    msg = ftxui::vbox({ ftxui::text(message) }) |
-      ftxui::center |
-      ftxui::border |
-      ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
-
-  if (result) {
-    msg |= ftxui::color(ftxui::Color::Green);
-  } else {
-    msg |= ftxui::color(ftxui::Color::Red);
-  }
-
-  auto msgToDisplay = ftxui::Container::Vertical({
-    ftxui::Renderer([msg] {
-      return msg;
-    }),
-  }) | ftxui::center;
-
-  return msgToDisplay;
-}
 
 int main()
 {
@@ -57,36 +10,10 @@ int main()
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-  const std::vector<std::string> options = {
-    "1. Create an OrderBook",
-    "2. List symbols that currently have OrderBooks",
-    "3. Add an Order to an OrderBook",
-    "4. Modify existing order",
-    "5. Display an order book",
-  };
-
-  // Page 0: Main Menu
-  int currentPage = 0;
+  int currentPage = static_cast<int>(Page::MAIN_MENU);
   int menuOptionSelected = 0;
-
   std::vector<std::string> symbols;
-  ftxui::MenuOption menuOption;
-  menuOption.on_enter = [&] {
-    switch (menuOptionSelected) {
-      case static_cast<int>(Action::CREATE_BOOK): currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
-      case static_cast<int>(Action::LIST_BOOKS): {
-        symbols = bookManager.getSymbols();
-        if (symbols.size())
-          currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE);
-        else
-          // FIXME: Make an error popup saying there are currently no books
-        break;
-      }
-    }
-  };
-  menuOption.Vertical();
-
-  auto mainMenu = ftxui::Menu(&options, &menuOptionSelected, menuOption) | STYLE;
+  auto mainMenu = UserInterface::createMainMenu(bookManager, currentPage, menuOptionSelected, symbols);
 
   // Page 1: Create Book
   std::string symbol;
@@ -143,12 +70,12 @@ int main()
     listBookWithBack,
   }, &currentPage);
   auto withModals = allTabs;
-  withModals |= ftxui::Modal(createResultModal(true, "Book was created!"), &successModalShown);
-  withModals |= ftxui::Modal(createResultModal(false, "Failed to create book!"), &failureModalShown);
+  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &successModalShown);
+  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &failureModalShown);
 
   auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape && !successModalShown && !failureModalShown) {
-      currentPage = 0; // Return to main menu
+      currentPage = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
     }
     if (event == ftxui::Event::Return) {

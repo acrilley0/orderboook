@@ -29,6 +29,7 @@ set(SOURCES
     src/main.cpp
     src/OrderBook.cpp
     src/OrderBookManager.cpp
+    src/UserInterface.cpp
 )
 
 add_executable(orderbook ${SOURCES})
