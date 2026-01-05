@@ -20,16 +20,24 @@ int main()
   bool inserted = false;
   bool successModalShown = false;
   bool failureModalShown = false;
-  auto bookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown);
+  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown);
 
   // Page 2: List Books
   int selected = 0;
   auto bookListPage = UserInterface::listBooksPage(symbols, selected);
 
+  // Temp to guarantee a book exists on the add order page
+  std::string price;
+  std::string quantity;
+  bookManager.initBook("AAPL");
+  auto aaplBook = bookManager.getBook("AAPL");
+  auto addOrderPage = UserInterface::addOrderPage(*aaplBook, price, quantity);
+
   auto allTabs = ftxui::Container::Tab({
     mainMenu,
-    bookPage,
+    createBookPage,
     bookListPage,
+    addOrderPage,
   }, &currentPage);
   auto withModals = allTabs;
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &successModalShown);

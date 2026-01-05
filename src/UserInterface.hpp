@@ -7,7 +7,7 @@
 #include <ftxui/util/ref.hpp>
 #include "OrderBookManager.hpp"
 
-#define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50) | ftxui::center
+#define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 50) | ftxui::center
 
 enum class Action {
   CREATE_BOOK,
@@ -36,8 +36,16 @@ const std::vector<std::string> options = {
 
 class UserInterface {
 public:
-  static ftxui::Component createMainMenu(const OrderBookManager& bookManager, int& currentPage, int& menuOptionSelected, std::vector<std::string>& symbols);
-  static ftxui::Component createBookPage(OrderBookManager& bookManager, std::string& symbol, bool& inserted, bool& successModalShown, bool& failureModalShown);
-  static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
+  static ftxui::Component createMainMenu(const OrderBookManager& bookManager,
+                                         int& currentPage,
+                                         int& menuOptionSelected,
+                                         std::vector<std::string>& symbols);
+  static ftxui::Component createBookPage(OrderBookManager& bookManager,
+                                         std::string& symbol,
+                                         bool& inserted,
+                                         bool& successModalShown,
+                                         bool& failureModalShown);
+  static ftxui::Component listBooksPage(std::vector<std::string>& symbols,int& selected);
+  static ftxui::Component addOrderPage(OrderBook& book, std::string& priceStr, std::string& quantityStr);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
