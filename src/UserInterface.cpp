@@ -1,4 +1,5 @@
 #include "UserInterface.hpp"
+#include "StringUtils.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/component/component_options.hpp>
@@ -41,8 +42,9 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager, st
 {
   ftxui::InputOption inputOption;
   inputOption.on_enter = [&] {
-    if (!symbol.empty()) {
-      inserted = bookManager.initBook(symbol);
+    std::string trimmed = trim(symbol);
+    if (!trimmed.empty()) {
+      inserted = bookManager.initBook(trimmed);
       if (inserted) {
         successModalShown = true;
       } else {

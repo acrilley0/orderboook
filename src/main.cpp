@@ -26,6 +26,7 @@ int main()
   int selected = 0;
   auto bookListPage = UserInterface::listBooksPage(symbols, selected);
 
+  // FIXME: Get rid of this...
   // Temp to guarantee a book exists on the add order page
   std::string price;
   std::string quantity;
