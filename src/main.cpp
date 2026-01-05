@@ -29,28 +29,27 @@ enum class Page {
   DISPLAY_BOOK_PAGE
 };
 
-ftxui::Component createSuccessModal(bool& successModalShown)
-{
-  return ftxui::Container::Vertical({
-    ftxui::Renderer([&] {
-      return ftxui::vbox({
-        ftxui::text("Successfully created book!"),
-      }) | STYLE;
-    }),
-    ftxui::Button("OK", [&] { successModalShown = false; }) | STYLE
-  }) | STYLE;
-}
+ftxui::Component createResultModal(bool& shown, bool result, const std::string& message) {
+  ftxui::Element displayedMsg;
+  if (result)
+    displayedMsg = ftxui::vbox({ ftxui::text(message) }) |
+      ftxui::center |
+      ftxui::border |
+      ftxui::color(ftxui::Color::Green) |
+      ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
+  else
+    displayedMsg = ftxui::vbox({ ftxui::text(message) }) |
+      ftxui::center |
+      ftxui::border |
+      ftxui::color(ftxui::Color::Red) |
+      ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50);
 
-ftxui::Component createFailureModal(bool& failureModalShown)
-{
   return ftxui::Container::Vertical({
-    ftxui::Renderer([&] {
-      return ftxui::vbox({
-        ftxui::text("A book with that symbol already exists!"),
-      }) | ftxui::center | ftxui::border | ftxui::color(ftxui::Color::Red);
+    ftxui::Renderer([displayedMsg] {
+      return displayedMsg;
     }),
-    ftxui::Button("OK", [&] { failureModalShown = false; }),
-  });
+    ftxui::Button("OK", [&shown] { shown = false; }) | STYLE
+  }) | ftxui::center;
 }
 
 int main()
@@ -107,7 +106,7 @@ int main()
       symbol.clear();
     }
   };
-  auto inputSymbol = ftxui::Input(&symbol, "Enter symbol: ", inputOption);
+  auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
   auto createBookPage = ftxui::Container::Vertical({inputSymbol});
 
   // Page 2: List Books
@@ -127,8 +126,9 @@ int main()
   });
 
   auto createBookWithBack = ftxui::Renderer(createBookPage, [&] {
-    return ftxui::vbox({
-      inputSymbol->Render(),
+    return ftxui::hbox({
+      ftxui::text("Symbol: "),
+      inputSymbol->Render() | ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 50),
     }) | STYLE;
   });
 
@@ -152,9 +152,9 @@ int main()
   });
 
   finalContainer |=
-    ftxui::Modal(createSuccessModal(successModalShown), &successModalShown);
+    ftxui::Modal(createResultModal(successModalShown, true, "Book was created!"), &successModalShown);
   finalContainer |=
-    ftxui::Modal(createFailureModal(failureModalShown), &failureModalShown);
+    ftxui::Modal(createResultModal(failureModalShown, false, "Failure to create book!"), &failureModalShown);
 
   screen.Loop(finalContainer);
 
