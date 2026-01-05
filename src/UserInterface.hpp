@@ -38,5 +38,6 @@ class UserInterface {
 public:
   static ftxui::Component createMainMenu(const OrderBookManager& bookManager, int& currentPage, int& menuOptionSelected, std::vector<std::string>& symbols);
   static ftxui::Component createBookPage(OrderBookManager& bookManager, std::string& symbol, bool& inserted, bool& successModalShown, bool& failureModalShown);
+  static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };

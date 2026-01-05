@@ -23,18 +23,13 @@ int main()
   auto bookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown);
 
   // Page 2: List Books
-  int s = 0;
-  auto bookListPage = ftxui::Menu(&symbols, &s, ftxui::MenuOption::Vertical());
-
-  auto listBookWithBack = ftxui::Container::Vertical({
-      ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks:"); }),
-      bookListPage,
-  }) | STYLE;
+  int selected = 0;
+  auto bookListPage = UserInterface::listBooksPage(symbols, selected);
 
   auto allTabs = ftxui::Container::Tab({
     mainMenu,
     bookPage,
-    listBookWithBack,
+    bookListPage,
   }, &currentPage);
   auto withModals = allTabs;
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &successModalShown);

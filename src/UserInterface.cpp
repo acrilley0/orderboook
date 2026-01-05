@@ -56,6 +56,17 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager, st
   return labeledInput;
 }
 
+ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected)
+{
+  auto bookList = ftxui::Menu(&symbols, &selected, ftxui::MenuOption::Vertical());
+  auto listWithTitle = ftxui::Container::Vertical({
+    ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks"); }),
+    bookList,
+  }) | STYLE;
+
+  return listWithTitle;
+}
+
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)
 {
   ftxui::Element msg;
