@@ -12,34 +12,24 @@ int main()
 
   int currentPage = static_cast<int>(Page::MAIN_MENU);
   int menuOptionSelected = 0;
-  std::vector<std::string> symbols;
-  auto mainMenu = UserInterface::createMainMenu(bookManager, currentPage, menuOptionSelected, symbols);
+  std::vector<std::string> symbolList;
+  auto mainMenu = UserInterface::createMainMenu(bookManager, currentPage, menuOptionSelected, symbolList);
 
   // Page 1: Create Book
   std::string symbol;
   bool inserted = false;
   bool successModalShown = false;
   bool failureModalShown = false;
-  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, inserted, successModalShown, failureModalShown);
+  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, symbolList, inserted, successModalShown, failureModalShown);
+
+  std::vector<ftxui::Component> tabs = {mainMenu, createBookPage};
 
   // Page 2: List Books
   int selected = 0;
-  auto bookListPage = UserInterface::listBooksPage(symbols, selected);
+  auto bookListPage = UserInterface::listBooksPage(symbolList, selected, Action::LIST_BOOKS);
+  tabs.push_back(bookListPage);
 
-  // FIXME: Get rid of this...
-  // Temp to guarantee a book exists on the add order page
-  std::string price;
-  std::string quantity;
-  bookManager.initBook("AAPL");
-  auto aaplBook = bookManager.getBook("AAPL");
-  auto addOrderPage = UserInterface::addOrderPage(*aaplBook, price, quantity);
-
-  auto allTabs = ftxui::Container::Tab({
-    mainMenu,
-    createBookPage,
-    bookListPage,
-    addOrderPage,
-  }, &currentPage);
+  auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
   auto withModals = allTabs;
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &successModalShown);
   withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &failureModalShown);

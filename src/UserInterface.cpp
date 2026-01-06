@@ -12,14 +12,12 @@ ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManag
   ftxui::MenuOption menuOption;
   menuOption.on_enter = [&] {
     switch (menuOptionSelected) {
-      case static_cast<int>(Action::CREATE_BOOK): currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE); break;
+      case static_cast<int>(Action::CREATE_BOOK): {
+        currentPage = static_cast<int>(Page::CREATE_BOOK_PAGE);
+        break;
+      }
       case static_cast<int>(Action::LIST_BOOKS): {
-        symbols = bookManager.getSymbols();
-        if (symbols.size()) {
-          currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE);
-        } else {
-          // FIXME: Make an error popup saying there are currently no books
-        }
+        currentPage = static_cast<int>(Page::LIST_BOOKS_PAGE);
         break;
       }
       case static_cast<int>(Action::ADD_ORDER): {
@@ -38,21 +36,26 @@ ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManag
   });
 }
 
-ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager, std::string& symbol, bool& inserted, bool& successModalShown, bool& failureModalShown)
+ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager,
+                                               std::string& symbol,
+                                               std::vector<std::string>& symbolList,
+                                               bool& inserted,
+                                               bool& successModalShown,
+                                               bool& failureModalShown)
 {
   ftxui::InputOption inputOption;
-  inputOption.on_enter = [&] {
+  inputOption.on_enter = [&bookManager, &symbol, &symbolList, &inserted, &successModalShown, &failureModalShown] {
     std::string trimmed = trim(symbol);
     if (!trimmed.empty()) {
       inserted = bookManager.initBook(trimmed);
       if (inserted) {
+        symbolList.push_back(trimmed);
         successModalShown = true;
       } else {
         failureModalShown = true;
       }
       symbol.clear();
     }
-    // FIXME: Figure out how not to create a book for an empty symbol
   };
   auto inputSymbol = ftxui::Input(&symbol, inputOption) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 30);
   auto labeledInput = ftxui::Container::Horizontal({
@@ -65,15 +68,22 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager, st
   return labeledInput;
 }
 
-ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected)
+ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected, Action action)
 {
-  auto bookList = ftxui::Menu(&symbols, &selected, ftxui::MenuOption::Vertical());
-  auto listWithTitle = ftxui::Container::Vertical({
-    ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks"); }),
-    bookList,
+  auto list = ftxui::Menu(&symbols, &selected, ftxui::MenuOption::Vertical());
+  auto symbolListContainer = ftxui::Container::Vertical({
+    ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks"); }) | ftxui::center,
+    list,
   }) | STYLE;
 
-  return listWithTitle;
+  auto symbolListComponent = ftxui::Renderer([&symbols, symbolListContainer] {
+    if (symbols.empty()) {
+      return ftxui::text("There are currently no OrderBooks!") | ftxui::center;
+    }
+    return symbolListContainer->Render();
+  });
+
+  return symbolListComponent;
 }
 
 ftxui::Component UserInterface::addOrderPage(OrderBook& book, std::string& priceStr, std::string& quantityStr)
