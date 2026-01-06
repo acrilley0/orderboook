@@ -68,7 +68,7 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager,
   return labeledInput;
 }
 
-ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected, Action action)
+ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected)
 {
   auto list = ftxui::Menu(&symbols, &selected, ftxui::MenuOption::Vertical());
   auto symbolListContainer = ftxui::Container::Vertical({
@@ -78,7 +78,7 @@ ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols,
 
   auto symbolListComponent = ftxui::Renderer([&symbols, symbolListContainer] {
     if (symbols.empty()) {
-      return ftxui::text("There are currently no OrderBooks!") | ftxui::center;
+      return ftxui::text("There are currently no OrderBooks!") | ftxui::border | ftxui::color(ftxui::Color::Yellow) | ftxui::center;
     }
     return symbolListContainer->Render();
   });
@@ -86,29 +86,30 @@ ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols,
   return symbolListComponent;
 }
 
-ftxui::Component UserInterface::addOrderPage(OrderBook& book, std::string& priceStr, std::string& quantityStr)
+ftxui::Component UserInterface::addOrderPage(OrderBook& book,
+                                             std::vector<std::string>& symbolList,
+                                             std::string& priceStr,
+                                             std::string& quantityStr)
 {
-  auto priceInput = ftxui::Input(&priceStr);
-  auto quantityInput = ftxui::Input(&quantityStr);
+  int selected = 0;
+  ftxui::MenuOption options;
+  bool added = false;
 
-  auto renderedOrderInfoInput = ftxui::Container::Vertical({
-    ftxui::Container::Horizontal({
-      ftxui::Renderer([] { return ftxui::text("Price:    "); }),
-      priceInput,
-    }),
-    ftxui::Container::Horizontal({
-      ftxui::Renderer([] { return ftxui::text("Quantity: "); }),
-      quantityInput,
-    }),
-  });
-  priceInput->TakeFocus();
-  // How do I make the down arrow key go straight to quantityInput?
-  renderedOrderInfoInput |= STYLE;
+  // TEST DATA
+  priceStr = "100.25";
+  quantityStr = "10000";
+  Order orderp = Order(1,
+                       std::atoi(quantityStr.c_str()),
+                       std::atof(priceStr.c_str()),
+                       0,
+                       BID,
+                       "AAPL");
+  options.on_enter = [&] {
+    added = book.addOrder(orderp);
+    // FIXME: Add popups to show result
+  };
 
-  // FIXME: The renderedPriceInput component needs an on_enter handler that calls
-  // the addOrder function to actually add the order to the book
-
-  return renderedOrderInfoInput;
+  auto list = ftxui::Menu(symbolList, &selected, options);
 }
 
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)

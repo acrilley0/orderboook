@@ -8,10 +8,10 @@ void OrderBook::displayBook()
   std::cout << "====================" << std::endl;
   for (auto it = bids.begin(); it != bids.end(); it++) {
     for (auto order : it->second) {
-      std::cout << "orderId: " << order->orderId <<
-        " price: " << order->price <<
-        " quantity: " << order->quantity <<
-        " time: " << order->timestamp << std::endl;
+      std::cout << "orderId: " << order.orderId <<
+        " price: " << order.price <<
+        " quantity: " << order.quantity <<
+        " time: " << order.timestamp << std::endl;
     }
   }
 
@@ -21,26 +21,26 @@ void OrderBook::displayBook()
   std::cout << "====================" << std::endl;
   for (auto it = asks.begin(); it != asks.end(); it++) {
     for (auto order : it->second) {
-      std::cout << "orderId: " << order->orderId <<
-        " price: " << order->price <<
-        " quantity: " << order->quantity <<
-        " time: " << order->timestamp << std::endl;
+      std::cout << "orderId: " << order.orderId <<
+        " price: " << order.price <<
+        " quantity: " << order.quantity <<
+        " time: " << order.timestamp << std::endl;
     }
   }
 }
 
-bool OrderBook::addOrder(std::shared_ptr<Order>& order)
+bool OrderBook::addOrder(Order& order)
 {
   bool inserted = false;
-  std::tie(std::ignore, inserted) = globalOrderIndex.insert({order->orderId, order});
+  std::tie(std::ignore, inserted) = globalOrderIndex.insert({order.orderId, order});
   if (!inserted) {
     return false;
   }
 
-  if (order->side == BID) {
-    std::tie(std::ignore, inserted) = bids[order->price].insert(order);
-  } else if (order->side == ASK) {
-    std::tie(std::ignore, inserted) = asks[order->price].insert(order);
+  if (order.side == BID) {
+    std::tie(std::ignore, inserted) = bids[order.price].insert(order);
+  } else if (order.side == ASK) {
+    std::tie(std::ignore, inserted) = asks[order.price].insert(order);
   }
 
   if (!inserted) {
@@ -65,7 +65,12 @@ Order* findOrderInMap(MapType& orderMap, u32 orderId) {
 
 Order* OrderBook::getOrder(u32 orderId)
 {
-  return globalOrderIndex[orderId].get();
+  auto iter = globalOrderIndex.find(orderId);
+  if (iter == globalOrderIndex.end()) {
+    return nullptr;
+  }
+
+  return &iter->second;
 }
 
 bool OrderBook::modifyOrder(Order& order)

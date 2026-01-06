@@ -46,7 +46,10 @@ public:
                                          bool& inserted,
                                          bool& successModalShown,
                                          bool& failureModalShown);
-  static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected, Action action);
-  static ftxui::Component addOrderPage(OrderBook& book, std::string& priceStr, std::string& quantityStr);
+  static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
+  static ftxui::Component addOrderPage(OrderBook& book,
+                                       std::vector<std::string>& symbolList,
+                                       std::string& priceStr,
+                                       std::string& quantityStr);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
