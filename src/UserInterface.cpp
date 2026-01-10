@@ -5,6 +5,7 @@
 #include <ftxui/component/component_options.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/dom/node.hpp>
+#include <ftxui/screen/color_info.hpp>
 #include <memory>
 
 ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManager, int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
@@ -44,6 +45,7 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager,
                                                bool& failureModalShown)
 {
   ftxui::InputOption inputOption;
+  inputOption.multiline = false;
   inputOption.on_enter = [&bookManager, &symbol, &symbolList, &inserted, &successModalShown, &failureModalShown] {
     std::string trimmed = trim(symbol);
     if (!trimmed.empty()) {
@@ -86,30 +88,54 @@ ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols,
   return symbolListComponent;
 }
 
-ftxui::Component UserInterface::addOrderPage(OrderBook& book,
-                                             std::vector<std::string>& symbolList,
+// FIXME: If you have the symbol here, then call getBook() in this func maybe?
+// Eventually I want to change this so that the book is automatically passed
+// here and we don't have to specify the symbol at that point
+ftxui::Component UserInterface::addOrderPage(OrderBook& _,
+                                             std::string& symbol,
                                              std::string& priceStr,
-                                             std::string& quantityStr)
+                                             std::string& quantityStr,
+                                             bool& successModalShown,
+                                             bool& failureModalShown)
 {
-  int selected = 0;
-  ftxui::MenuOption options;
-  bool added = false;
+  ftxui::InputOption inputOptions;
+  inputOptions.multiline = false;
 
-  // TEST DATA
-  priceStr = "100.25";
-  quantityStr = "10000";
-  Order orderp = Order(1,
-                       std::atoi(quantityStr.c_str()),
-                       std::atof(priceStr.c_str()),
-                       0,
-                       BID,
-                       "AAPL");
-  options.on_enter = [&] {
-    added = book.addOrder(orderp);
-    // FIXME: Add popups to show result
+  ftxui::Component resultContainer;
+
+  inputOptions.on_enter = [&] {
+    if (symbol.empty() || priceStr.empty() || quantityStr.empty()) {
+      failureModalShown = true;
+    }
   };
 
-  auto list = ftxui::Menu(symbolList, &selected, options);
+  auto symbolInput = ftxui::Input(&symbol, inputOptions);
+  auto priceInput = ftxui::Input(&priceStr, inputOptions);
+  auto quantityInput = ftxui::Input(&quantityStr, inputOptions);
+
+  auto symbolContainer = ftxui::Container::Horizontal({
+    ftxui::Renderer([] { return ftxui::text("Symbol:   "); }),
+    symbolInput,
+  });
+
+  auto priceContainer = ftxui::Container::Horizontal({
+    ftxui::Renderer([] { return ftxui::text("Price:    "); }),
+    priceInput,
+  });
+
+  auto quantityContainer = ftxui::Container::Horizontal({
+    ftxui::Renderer([] { return ftxui::text("Quantity: "); }),
+    quantityInput,
+  });
+
+  auto allInputsContainer = ftxui::Container::Vertical({
+    ftxui::Renderer([] { return ftxui::text("Press ENTER to submit an order") | ftxui::center; }),
+    symbolContainer,
+    priceContainer,
+    quantityContainer,
+  });
+
+  return allInputsContainer | STYLE;
 }
 
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)

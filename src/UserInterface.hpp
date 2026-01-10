@@ -48,8 +48,10 @@ public:
                                          bool& failureModalShown);
   static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
   static ftxui::Component addOrderPage(OrderBook& book,
-                                       std::vector<std::string>& symbolList,
+                                       std::string& symbol,
                                        std::string& priceStr,
-                                       std::string& quantityStr);
+                                       std::string& quantityStr,
+                                       bool& successModalShown,
+                                       bool& failureModalShown);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
