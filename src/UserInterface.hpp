@@ -37,8 +37,7 @@ const std::vector<std::string> options = {
 
 class UserInterface {
 public:
-  static ftxui::Component createMainMenu(const OrderBookManager& bookManager,
-                                         int& currentPage,
+  static ftxui::Component createMainMenu(int& currentPage,
                                          int& menuOptionSelected,
                                          std::vector<std::string>& symbols);
   static ftxui::Component createBookPage(OrderBookManager& bookManager,
@@ -52,6 +51,8 @@ public:
                                        std::string& symbol,
                                        std::string& priceStr,
                                        std::string& quantityStr,
+                                       const std::vector<std::string>& sides,
+                                       int& selectedSide,
                                        bool& successModalShown,
                                        bool& failureModalShown);
   static ftxui::Component displayBookPage(std::string& symbol);

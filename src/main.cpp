@@ -13,7 +13,7 @@ int main()
   int currentPage = static_cast<int>(Page::MAIN_MENU);
   int menuOptionSelected = 0;
   std::vector<std::string> symbolList;
-  auto mainMenu = UserInterface::createMainMenu(bookManager, currentPage, menuOptionSelected, symbolList);
+  auto mainMenu = UserInterface::createMainMenu(currentPage, menuOptionSelected, symbolList);
 
   // Page 1: Create Book
   std::string symbol;
@@ -31,11 +31,23 @@ int main()
 
   std::string price;
   std::string qty;
+  const std::vector<std::string> sides = {
+    "BID",
+    "ASK",
+  };
+  int selectedSide = 0;
   bool orderAddSuccessModal = false;
   bool orderAddFailureModal = false;
 
   // Page 3: Add Order Page
-  auto addOrderPage = UserInterface::addOrderPage(bookManager, symbol, price, qty, orderAddSuccessModal, orderAddFailureModal);
+  auto addOrderPage = UserInterface::addOrderPage(bookManager,
+                                                  symbol,
+                                                  price,
+                                                  qty,
+                                                  sides,
+                                                  selectedSide,
+                                                  orderAddSuccessModal,
+                                                  orderAddFailureModal);
   tabs.push_back(addOrderPage);
 
   // Page 5: Display Book Page

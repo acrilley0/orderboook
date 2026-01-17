@@ -1,8 +1,9 @@
 #include "UserInterface.hpp"
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/elements.hpp>
 
-ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManager, int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
+ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
 {
   ftxui::MenuOption menuOption;
   menuOption.on_enter = [&] {
@@ -90,6 +91,8 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
                                              std::string& symbol,
                                              std::string& priceStr,
                                              std::string& quantityStr,
+                                             const std::vector<std::string>& sides,
+                                             int& selectedSide,
                                              bool& successModalShown,
                                              bool& failureModalShown)
 {
@@ -101,17 +104,18 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
       failureModalShown = true;
       return;
     }
+
     OrderBook* book = bookManager.getBook(symbol);
     if (book == nullptr) {
       failureModalShown = true;
       return;
     }
 
-    Order newOrder = Order(1,
+    Order newOrder = Order(getCurrentTime(),
                            std::atoi(quantityStr.c_str()),
                            std::atof(priceStr.c_str()),
                            0,
-                           BID,
+                           static_cast<Side>(selectedSide),
                            symbol);
 
     bool orderAdded = book->addOrder(newOrder);
@@ -144,6 +148,8 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
   });
   quantityContainer->SetActiveChild(quantityInput);
 
+  auto sideContainer = ftxui::Radiobox(&sides, &selectedSide);
+
   auto inputContainer = ftxui::Container::Vertical({
     ftxui::Renderer([] {
       return ftxui::vbox({
@@ -154,8 +160,16 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
     symbolContainer,
     priceContainer,
     quantityContainer,
-  }) | STYLE;
+    ftxui::Renderer([] {
+      return ftxui::vbox({
+        ftxui::separator(),
+        ftxui::text("Side:"),
+      });
+    }),
+    sideContainer,
+  });
   inputContainer->SetActiveChild(symbolContainer);
+  inputContainer |= STYLE;
 
   return inputContainer;
 }
