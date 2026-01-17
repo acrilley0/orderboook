@@ -53,16 +53,6 @@ bool OrderBook::addOrder(Order& order)
   return true;
 }
 
-template<typename MapType>
-Order* findOrderInMap(MapType& orderMap, u32 orderId) {
-  auto iter = orderMap.find(orderId);
-  if (iter == orderMap.end()) {
-    return nullptr;
-  }
-
-  return iter->second.get();
-}
-
 Order* OrderBook::getOrder(u32 orderId)
 {
   auto iter = globalOrderIndex.find(orderId);

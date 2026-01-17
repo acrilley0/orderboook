@@ -1,7 +1,6 @@
-#include <string>
-#include <algorithm>
+#include "Utils.hpp"
 
-inline std::string trim(const std::string& str)
+std::string trim(const std::string& str)
 {
   auto start = std::find_if_not(str.begin(), str.end(), ::isspace);
   if (start == str.end()) {
@@ -13,7 +12,7 @@ inline std::string trim(const std::string& str)
   return std::string(start, end);
 }
 
-inline bool isEmptyOrWhitespace(const std::string& str)
+bool isEmptyOrWhitespace(const std::string& str)
 {
   return trim(str).empty();
 }

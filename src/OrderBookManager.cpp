@@ -15,6 +15,11 @@ OrderBook* OrderBookManager::getBook(const std::string& symbol)
   return books[symbol].get();
 }
 
+size_t OrderBookManager::getNumBooks()
+{
+  return books.size();
+}
+
 std::vector<std::string> OrderBookManager::getSymbols() const
 {
   std::vector<std::string> symbols = {};

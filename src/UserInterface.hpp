@@ -6,6 +6,7 @@
 #include <ftxui/screen/color.hpp>
 #include <ftxui/util/ref.hpp>
 #include "OrderBookManager.hpp"
+#include <chrono>
 
 #define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 50) | ftxui::center
 
@@ -47,7 +48,7 @@ public:
                                          bool& successModalShown,
                                          bool& failureModalShown);
   static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
-  static ftxui::Component addOrderPage(OrderBook& book,
+  static ftxui::Component addOrderPage(OrderBookManager& bookManager,
                                        std::string& symbol,
                                        std::string& priceStr,
                                        std::string& quantityStr,
