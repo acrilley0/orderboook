@@ -38,6 +38,8 @@ int main()
   auto addOrderPage = UserInterface::addOrderPage(bookManager, symbol, price, qty, orderAddSuccessModal, orderAddFailureModal);
   tabs.push_back(addOrderPage);
 
+  // Page 5: Display Book Page
+
   auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
   auto withModals = allTabs;
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &bookCreationSuccessModal);

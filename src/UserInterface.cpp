@@ -1,13 +1,6 @@
 #include "UserInterface.hpp"
-#include "Utils.hpp"
-#include <chrono>
 #include <ftxui/component/component.hpp>
-#include <ftxui/component/component_base.hpp>
-#include <ftxui/component/component_options.hpp>
 #include <ftxui/dom/elements.hpp>
-#include <ftxui/dom/node.hpp>
-#include <ftxui/screen/color_info.hpp>
-#include <memory>
 
 ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManager, int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
 {
@@ -24,6 +17,10 @@ ftxui::Component UserInterface::createMainMenu(const OrderBookManager& bookManag
       }
       case static_cast<int>(Action::ADD_ORDER): {
         currentPage = static_cast<int>(Page::ADD_ORDER_PAGE);
+        break;
+      }
+      case static_cast<int>(Action::DISPLAY_BOOK): {
+        currentPage = static_cast<int>(Page::DISPLAY_BOOK_PAGE);
         break;
       }
     }
@@ -89,9 +86,6 @@ ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols,
   return symbolListComponent;
 }
 
-// FIXME: If you have the symbol here, then call getBook() in this func maybe?
-// Eventually I want to change this so that the book is automatically passed
-// here and we don't have to specify the symbol at that point
 ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
                                              std::string& symbol,
                                              std::string& priceStr,
@@ -102,42 +96,29 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
   ftxui::InputOption inputOptions;
   inputOptions.multiline = false;
 
-  OrderBook *book = nullptr;
-
   inputOptions.on_enter = [&] {
     if (symbol.empty() || priceStr.empty() || quantityStr.empty()) {
       failureModalShown = true;
+      return;
     }
-
-    book = bookManager.getBook(symbol);
+    OrderBook* book = bookManager.getBook(symbol);
     if (book == nullptr) {
       failureModalShown = true;
+      return;
     }
 
-    if (!failureModalShown) {
-      // FIXME: Should I exit early above?
-      auto time = std::chrono::steady_clock::now();
-      auto tse = time.time_since_epoch();
-      auto timeSinceEpoch = tse.count();
+    Order newOrder = Order(1,
+                           std::atoi(quantityStr.c_str()),
+                           std::atof(priceStr.c_str()),
+                           0,
+                           BID,
+                           symbol);
 
-      Order newOrder = Order(timeSinceEpoch,
-                             std::atoi(quantityStr.c_str()),
-                             std::atof(priceStr.c_str()),
-                             timeSinceEpoch,
-                             BID,
-                             symbol);
-
-      // THIS SECTION MAKES THE APP CRASH
-      bool orderAdded = book->addOrder(newOrder);
-      if (orderAdded) {
-        successModalShown = true;
-      } else {
-        failureModalShown = true;
-      }
-
-      symbol.clear();
-      priceStr.clear();
-      quantityStr.clear();
+    bool orderAdded = book->addOrder(newOrder);
+    if (orderAdded) {
+      successModalShown = true;
+    } else {
+      failureModalShown = true;
     }
   };
 
@@ -148,41 +129,35 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
   auto symbolContainer = ftxui::Container::Horizontal({
     ftxui::Renderer([] { return ftxui::text("Symbol:   "); }),
     symbolInput,
-  }) | STYLE;
+  });
+  symbolContainer->SetActiveChild(symbolInput);
 
   auto priceContainer = ftxui::Container::Horizontal({
     ftxui::Renderer([] { return ftxui::text("Price:    "); }),
     priceInput,
-  }) | STYLE;
+  });
+  priceContainer->SetActiveChild(priceInput);
 
   auto quantityContainer = ftxui::Container::Horizontal({
     ftxui::Renderer([] { return ftxui::text("Quantity: "); }),
     quantityInput,
-  }) | STYLE;
-
-  auto noBooksMessage = ftxui::Renderer([] {
-    return ftxui::text("There are currently no OrderBooks!") | ftxui::border | ftxui::color(ftxui::Color::Yellow) | ftxui::center;
   });
+  quantityContainer->SetActiveChild(quantityInput);
 
   auto inputContainer = ftxui::Container::Vertical({
+    ftxui::Renderer([] {
+      return ftxui::vbox({
+        ftxui::text("Order Information"),
+        ftxui::separator(),
+      });
+    }),
     symbolContainer,
     priceContainer,
     quantityContainer,
-  });
+  }) | STYLE;
+  inputContainer->SetActiveChild(symbolContainer);
 
-  auto allInputsContainer = ftxui::Renderer(inputContainer, [&bookManager, inputContainer] {
-    if (bookManager.getNumBooks() == 0) {
-      return ftxui::text("There are currently no OrderBooks!") | ftxui::border | ftxui::color(ftxui::Color::Yellow) | ftxui::center;
-    }
-    return ftxui::vbox({
-      ftxui::text("Press ENTER to submit your order"),
-      inputContainer->Render(),
-    }) | STYLE;
-  });
-
-  allInputsContainer->SetActiveChild(inputContainer);
-
-  return allInputsContainer;
+  return inputContainer;
 }
 
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)

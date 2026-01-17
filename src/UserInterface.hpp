@@ -6,7 +6,7 @@
 #include <ftxui/screen/color.hpp>
 #include <ftxui/util/ref.hpp>
 #include "OrderBookManager.hpp"
-#include <chrono>
+#include "Utils.hpp"
 
 #define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 50) | ftxui::center
 
@@ -54,5 +54,6 @@ public:
                                        std::string& quantityStr,
                                        bool& successModalShown,
                                        bool& failureModalShown);
+  static ftxui::Component displayBookPage(std::string& symbol);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };

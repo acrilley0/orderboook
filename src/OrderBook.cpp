@@ -44,11 +44,8 @@ bool OrderBook::addOrder(Order& order)
   }
 
   if (!inserted) {
-    std::cout << "Failed to insert order!" << std::endl;
     return false;
   }
-
-  std::cout << "Order was added successfully!" << std::endl;
 
   return true;
 }
