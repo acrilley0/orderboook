@@ -2,8 +2,11 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/elements.hpp>
+#include <ftxui/dom/node.hpp>
+#include <iostream> // FIXME: Only for testing
+#include <stdexcept>
 
-ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOptionSelected, std::vector<std::string>& symbols)
+ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOptionSelected)
 {
   ftxui::MenuOption menuOption;
   menuOption.on_enter = [&] {
@@ -31,7 +34,12 @@ ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOption
   auto mainMenu = ftxui::Menu(&options, &menuOptionSelected, menuOption) | STYLE;
 
   return ftxui::Container::Vertical({
-    ftxui::Renderer([] { return ftxui::text("Welcome to the OrderBook"); }) | ftxui::center | ftxui::color(ftxui::Color::Blue),
+    ftxui::Renderer([] {
+      return ftxui::vbox({
+        ftxui::text("Welcome to the OrderBook"),
+        ftxui::separator(),
+      });
+    }) | ftxui::center | ftxui::color(ftxui::Color::Blue),
     mainMenu,
   });
 }
@@ -174,6 +182,67 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
   return inputContainer;
 }
 
+ftxui::Component UserInterface::printBookInfoModal(const std::vector<std::string>& symbolList, int& index)
+{
+  std::string symbol;
+  try {
+    symbol = symbolList.at(index);
+  } catch (std::out_of_range&) {
+    return ftxui::Renderer([] { return ftxui::text("NO ORDERS"); });
+  }
+
+  // TODO: Call getBook(symbol) here and then print bids/asks
+  auto bookInfo = ftxui::vbox({
+    ftxui::text("Symbol: " + symbol) | ftxui::bold,
+    ftxui::separator(),
+    ftxui::text("BIDS") | ftxui::bold,
+    ftxui::separator(),
+    ftxui::text("ASKS") | ftxui::bold,
+    ftxui::separator(),
+  }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 50) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 50);
+
+  auto bookInfoToDisplay = ftxui::Container::Vertical({
+    ftxui::Renderer([bookInfo] {
+      return bookInfo;
+    }),
+  }) | ftxui::center;
+
+  return bookInfoToDisplay;
+}
+
+ftxui::Component UserInterface::displayBookPage(OrderBookManager& bookManager,
+                                                std::vector<std::string>& symbolList,
+                                                int& selectedSymbol,
+                                                bool& displayBookInfoModal)
+{
+  ftxui::MenuOption menuOptions = {
+    ftxui::MenuOption::Vertical(),
+  };
+  menuOptions.on_enter = [&bookManager, &symbolList, &selectedSymbol, &displayBookInfoModal] {
+    OrderBook* book = bookManager.getBook(symbolList[selectedSymbol]);
+    // We are guaranteed to have a book at this point
+    displayBookInfoModal = true;
+  };
+
+  auto list = ftxui::Menu(&symbolList, &selectedSymbol, menuOptions);
+  auto symbolSelectContainer = ftxui::Container::Vertical({
+    ftxui::Renderer([&symbolList] {
+      if (symbolList.empty()) {
+        return ftxui::text("There are currently no OrderBooks!") | ftxui::border | ftxui::color(ftxui::Color::Yellow) | ftxui::center;
+      } else {
+        return ftxui::vbox({
+          ftxui::text("Choose symbol to display Orders:"),
+          ftxui::separator(),
+        });
+      }
+    }),
+    list | STYLE,
+  });
+  symbolSelectContainer->SetActiveChild(list);
+
+  return symbolSelectContainer;
+}
+
 ftxui::Component UserInterface::createResultModal(bool result, const std::string& message)
 {
   ftxui::Element msg;
@@ -192,7 +261,7 @@ ftxui::Component UserInterface::createResultModal(bool result, const std::string
     ftxui::Renderer([msg] {
       return msg;
     }),
-  }) | ftxui::center;
+  }) | STYLE;
 
   return msgToDisplay;
 }

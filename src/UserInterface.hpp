@@ -23,8 +23,8 @@ enum class Page {
   CREATE_BOOK_PAGE,
   LIST_BOOKS_PAGE,
   ADD_ORDER_PAGE,
+  DISPLAY_BOOK_PAGE,
   MODIFY_ORDER_PAGE,
-  DISPLAY_BOOK_PAGE
 };
 
 const std::vector<std::string> options = {
@@ -38,8 +38,7 @@ const std::vector<std::string> options = {
 class UserInterface {
 public:
   static ftxui::Component createMainMenu(int& currentPage,
-                                         int& menuOptionSelected,
-                                         std::vector<std::string>& symbols);
+                                         int& menuOptionSelected);
   static ftxui::Component createBookPage(OrderBookManager& bookManager,
                                          std::string& symbol,
                                          std::vector<std::string>& symbolList,
@@ -55,6 +54,10 @@ public:
                                        int& selectedSide,
                                        bool& successModalShown,
                                        bool& failureModalShown);
-  static ftxui::Component displayBookPage(std::string& symbol);
+  static ftxui::Component printBookInfoModal(const std::vector<std::string>& symbolList, int& index);
+  static ftxui::Component displayBookPage(OrderBookManager& bookManager,
+                                          std::vector<std::string>& symbolList,
+                                          int& selectedSymbol,
+                                          bool& displayBookInfoModal);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
