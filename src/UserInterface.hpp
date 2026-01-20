@@ -54,10 +54,13 @@ public:
                                        int& selectedSide,
                                        bool& successModalShown,
                                        bool& failureModalShown);
-  static ftxui::Component printBookInfoModal(const std::vector<std::string>& symbolList, int& index);
+  static ftxui::Component printBookInfoModal(OrderBookManager& bookManager,
+                                             const std::vector<std::string>& symboLlist,
+                                             int& symboLIndex);
   static ftxui::Component displayBookPage(OrderBookManager& bookManager,
                                           std::vector<std::string>& symbolList,
                                           int& selectedSymbol,
-                                          bool& displayBookInfoModal);
+                                          bool& displayBookInfoModal,
+                                          std::string& currentSymbolForModal);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };

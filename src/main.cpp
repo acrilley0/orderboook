@@ -53,11 +53,18 @@ int main()
   // Page 5: Display Book Page
   int selectedSymbol = 0;
   bool displayBookInfoModal = false;
+  std::string currentSymbolForModal;
   auto displayBookPage = UserInterface::displayBookPage(bookManager,
                                                         symbolList,
                                                         selectedSymbol,
-                                                        displayBookInfoModal);
+                                                        displayBookInfoModal,
+                                                        currentSymbolForModal);
   tabs.push_back(displayBookPage);
+
+  // auto bookInfoModal = ftxui::Modal(
+  //   UserInterface::printBookInfoModal(bookManager, currentSymbolForModal, forceRefresh),
+  //   &displayBookInfoModal
+  // );
 
   auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
   auto withModals = allTabs;
@@ -65,7 +72,8 @@ int main()
   withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &bookCreationFailureModal);
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &orderAddSuccessModal);
   withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &orderAddFailureModal);
-  withModals |= ftxui::Modal(UserInterface::printBookInfoModal(symbolList, selectedSymbol), &displayBookInfoModal); // FIXME: This should look up a book
+  // withModals |= bookInfoModal;
+  withModals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbolList, selectedSymbol), &displayBookInfoModal);
 
   auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&

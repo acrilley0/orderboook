@@ -12,6 +12,9 @@ bool OrderBookManager::initBook(const std::string& symbol)
 
 OrderBook* OrderBookManager::getBook(const std::string& symbol)
 {
+  if (books.at(symbol) == nullptr) {
+    return nullptr;
+  }
   return books[symbol].get();
 }
 
