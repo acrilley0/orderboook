@@ -3,7 +3,6 @@
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/dom/node.hpp>
-#include <locale>
 #include <stdexcept>
 
 ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOptionSelected)
@@ -114,13 +113,15 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
       return;
     }
 
-    OrderBook* book = bookManager.getBook(symbol);
-    if (book == nullptr) {
+    OrderBook* book = nullptr;
+    try {
+      book = bookManager.getBook(symbol);
+    } catch (std::out_of_range&) {
       failureModalShown = true;
       return;
     }
 
-    Order newOrder = Order(getCurrentTime(),
+    Order newOrder = Order(getCurrentTime() + std::atoi(quantityStr.c_str()), // FIXME: Figure out a good way to generate order IDs
                            std::atoi(quantityStr.c_str()),
                            std::atof(priceStr.c_str()),
                            getCurrentTime(),

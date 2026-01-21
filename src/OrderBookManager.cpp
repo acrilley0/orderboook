@@ -1,5 +1,4 @@
 #include "OrderBookManager.hpp"
-#include <iostream>
 
 bool OrderBookManager::initBook(const std::string& symbol)
 {
@@ -12,10 +11,7 @@ bool OrderBookManager::initBook(const std::string& symbol)
 
 OrderBook* OrderBookManager::getBook(const std::string& symbol)
 {
-  if (books.at(symbol) == nullptr) {
-    return nullptr;
-  }
-  return books[symbol].get();
+  return books.at(symbol).get();
 }
 
 size_t OrderBookManager::getNumBooks()

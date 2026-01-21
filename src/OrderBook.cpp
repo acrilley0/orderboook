@@ -43,11 +43,7 @@ bool OrderBook::addOrder(Order& order)
     std::tie(std::ignore, inserted) = asks[order.price].insert(order);
   }
 
-  if (!inserted) {
-    return false;
-  }
-
-  return true;
+  return inserted;
 }
 
 Order* OrderBook::getOrder(u32 orderId)

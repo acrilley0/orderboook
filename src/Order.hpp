@@ -3,7 +3,7 @@
 #include "Utils.hpp"
 
 typedef enum {
-  BID = 1,
+  BID,
   ASK,
 } Side;
 
@@ -12,7 +12,7 @@ public:
   u32         orderId;
   u32         quantity;
   double      price;
-  u64         timestamp; // FIXME: Convert this to a millsecond timestamp
+  u64         timestamp;
   Side        side;
   std::string symbol;
   // Order type?
