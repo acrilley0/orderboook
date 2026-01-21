@@ -45,7 +45,7 @@ public:
                                          bool& inserted,
                                          bool& successModalShown,
                                          bool& failureModalShown);
-  static ftxui::Component listBooksPage(std::vector<std::string>& symbols, int& selected);
+  static ftxui::Component listBooksPage(std::vector<std::string>& symbols);
   static ftxui::Component addOrderPage(OrderBookManager& bookManager,
                                        std::string& symbol,
                                        std::string& priceStr,
@@ -57,8 +57,7 @@ public:
   static ftxui::Component printBookInfoModal(OrderBookManager& bookManager,
                                              const std::vector<std::string>& symboLlist,
                                              int& symboLIndex);
-  static ftxui::Component displayBookPage(OrderBookManager& bookManager,
-                                          std::vector<std::string>& symbolList,
+  static ftxui::Component displayBookPage(std::vector<std::string>& symbolList,
                                           int& selectedSymbol,
                                           bool& displayBookInfoModal,
                                           std::string& currentSymbolForModal);

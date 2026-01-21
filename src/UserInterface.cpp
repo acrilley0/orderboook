@@ -76,14 +76,21 @@ ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager,
   return labeledInput;
 }
 
-// FIXME: Change this Component to be a vbox instead of a menu
-ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols, int& selected)
+ftxui::Component UserInterface::listBooksPage(std::vector<std::string>& symbols)
 {
-  auto list = ftxui::Menu(&symbols, &selected, ftxui::MenuOption::Vertical());
   auto symbolListContainer = ftxui::Container::Vertical({
-    ftxui::Renderer([] { return ftxui::text("The following symbols currently have OrderBooks"); }) | ftxui::center,
-    list,
-  }) | STYLE;
+    ftxui::Renderer([&symbols] {
+      std::vector<ftxui::Element> symbolList;
+      for (const auto& symbol : symbols) {
+        symbolList.push_back(ftxui::text(symbol));
+      }
+      return ftxui::vbox(
+        ftxui::text("The following symbols currently have OrderBooks:"),
+        ftxui::separator(),
+        symbolList
+      ) | STYLE;
+    }),
+  });
 
   auto symbolListComponent = ftxui::Renderer([&symbols, symbolListContainer] {
     if (symbols.empty()) {
@@ -232,8 +239,7 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
   return bookInfoRenderer;
 }
 
-ftxui::Component UserInterface::displayBookPage(OrderBookManager& bookManager,
-                                                std::vector<std::string>& symbolList,
+ftxui::Component UserInterface::displayBookPage(std::vector<std::string>& symbolList,
                                                 int& selectedSymbol,
                                                 bool& displayBookInfoModal,
                                                 std::string& currentSymbolForModal)

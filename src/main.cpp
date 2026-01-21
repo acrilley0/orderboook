@@ -25,8 +25,7 @@ int main()
   std::vector<ftxui::Component> tabs = {mainMenu, createBookPage};
 
   // Page 2: List Books
-  int selected = 0;
-  auto bookListPage = UserInterface::listBooksPage(symbolList, selected);
+  auto bookListPage = UserInterface::listBooksPage(symbolList);
   tabs.push_back(bookListPage);
 
   // Page 3: Add Order Page
@@ -54,8 +53,7 @@ int main()
   int selectedSymbol = 0;
   bool displayBookInfoModal = false;
   std::string currentSymbolForModal;
-  auto displayBookPage = UserInterface::displayBookPage(bookManager,
-                                                        symbolList,
+  auto displayBookPage = UserInterface::displayBookPage(symbolList,
                                                         selectedSymbol,
                                                         displayBookInfoModal,
                                                         currentSymbolForModal);
