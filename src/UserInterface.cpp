@@ -207,19 +207,24 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
       return ftxui::text("No book selected!") | ftxui::color(ftxui::Color::Red);
     }
 
+    int levelCounter = 1;
     std::vector<ftxui::Element> bidLevels;
     for (const auto & priceLevel : book->bids) {
-      for (const auto &order : priceLevel.second) {
-        bidLevels.push_back(ftxui::text("Price: " + std::to_string(order.price) +
+      for (const auto & order : priceLevel.second) {
+        bidLevels.push_back(ftxui::text("Level[" + std::to_string(levelCounter) + "] -- " +
+                                        "Price: " + std::to_string(order.price) +
                                         " Quantity: " + std::to_string(order.quantity) +
                                         " Timestamp: " + std::to_string(order.timestamp)));
       }
+      levelCounter++;
     }
 
+    levelCounter = 0;
     std::vector<ftxui::Element> askLevels;
     for (const auto & priceLevel : book->asks) {
-      for (const auto &order : priceLevel.second) {
-        askLevels.push_back(ftxui::text("Price: " + std::to_string(order.price) +
+      for (const auto & order : priceLevel.second) {
+        bidLevels.push_back(ftxui::text("Level[" + std::to_string(levelCounter) + "] -- " +
+                                        "Price: " + std::to_string(order.price) +
                                         " Quantity: " + std::to_string(order.quantity) +
                                         " Timestamp: " + std::to_string(order.timestamp)));
       }
@@ -227,13 +232,12 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
 
     return ftxui::vbox({
       ftxui::text("Symbol: " + book->symbol) | ftxui::color(ftxui::Color::Green3) | ftxui::bold | ftxui::center,
-      ftxui::text("Order Counts - " + std::to_string(book->bids.size()) + " bids, " + std::to_string(book->asks.size()) + " asks"),
       ftxui::text("BIDS") | ftxui::color(ftxui::Color::Green3) | ftxui::bold | ftxui::underlined,
       ftxui::vbox(bidLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),
       ftxui::separator(),
       ftxui::text("ASKS") | ftxui::color(ftxui::Color::Green3)| ftxui::bold | ftxui::underlined,
       ftxui::vbox(askLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),
-    }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 75);
+    }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 75) | ftxui::border;
   });
 
   return bookInfoRenderer;
