@@ -216,26 +216,31 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
                                         " Quantity: " + std::to_string(order.quantity) +
                                         " Timestamp: " + std::to_string(order.timestamp)));
       }
+      bidLevels.push_back(ftxui::separator());
       levelCounter++;
     }
 
-    levelCounter = 0;
+    levelCounter = 1;
     std::vector<ftxui::Element> askLevels;
     for (const auto & priceLevel : book->asks) {
       for (const auto & order : priceLevel.second) {
-        bidLevels.push_back(ftxui::text("Level[" + std::to_string(levelCounter) + "] -- " +
+        askLevels.push_back(ftxui::text("Level[" + std::to_string(levelCounter) + "] -- " +
                                         "Price: " + std::to_string(order.price) +
                                         " Quantity: " + std::to_string(order.quantity) +
                                         " Timestamp: " + std::to_string(order.timestamp)));
       }
+      askLevels.push_back(ftxui::separator());
+      levelCounter++;
     }
 
     return ftxui::vbox({
       ftxui::text("Symbol: " + book->symbol) | ftxui::color(ftxui::Color::Green3) | ftxui::bold | ftxui::center,
-      ftxui::text("BIDS") | ftxui::color(ftxui::Color::Green3) | ftxui::bold | ftxui::underlined,
+      ftxui::text("BIDS") | ftxui::color(ftxui::Color::Green3) | ftxui::bold,
+      ftxui::separator(),
       ftxui::vbox(bidLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),
       ftxui::separator(),
-      ftxui::text("ASKS") | ftxui::color(ftxui::Color::Green3)| ftxui::bold | ftxui::underlined,
+      ftxui::text("ASKS") | ftxui::color(ftxui::Color::Green3)| ftxui::bold,
+      ftxui::separator(),
       ftxui::vbox(askLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),
     }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 75) | ftxui::border;
   });

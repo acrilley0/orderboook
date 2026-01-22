@@ -1,8 +1,6 @@
 #include "UserInterface.hpp"
 #include <cstdlib>
 #include <memory>
-#include <chrono>
-#include <iostream>
 
 int main()
 {
@@ -31,10 +29,6 @@ int main()
   // Page 3: Add Order Page
   std::string price;
   std::string qty;
-  const std::vector<std::string> sides = {
-    "BID",
-    "ASK",
-  };
   int selectedSide = 0;
   bool orderAddSuccessModal = false;
   bool orderAddFailureModal = false;
@@ -59,11 +53,6 @@ int main()
                                                         currentSymbolForModal);
   tabs.push_back(displayBookPage);
 
-  // auto bookInfoModal = ftxui::Modal(
-  //   UserInterface::printBookInfoModal(bookManager, currentSymbolForModal, forceRefresh),
-  //   &displayBookInfoModal
-  // );
-
   auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
   auto withModals = allTabs;
   withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &bookCreationSuccessModal);
@@ -83,6 +72,11 @@ int main()
       currentPage = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
     }
+
+    if (event == ftxui::Event::Escape && currentPage == static_cast<int>(Page::MAIN_MENU)) {
+      // If the user hits Escape at the main menu, it should warn them that they are about to quit
+    }
+
     if (event == ftxui::Event::Return) {
       if (bookCreationSuccessModal) {
         bookCreationSuccessModal = false;

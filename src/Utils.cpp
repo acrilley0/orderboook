@@ -2,12 +2,12 @@
 
 std::string trim(const std::string& str)
 {
-  auto start = std::find_if_not(str.begin(), str.end(), ::isspace);
+  auto start = std::ranges::find_if_not(str.begin(), str.end(), ::isspace);
   if (start == str.end()) {
     return "";
   }
 
-  auto end = std::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
+  auto end = std::ranges::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
 
   return std::string(start, end);
 }

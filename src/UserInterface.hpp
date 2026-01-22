@@ -6,7 +6,6 @@
 #include <ftxui/screen/color.hpp>
 #include <ftxui/util/ref.hpp>
 #include "OrderBookManager.hpp"
-#include "Utils.hpp"
 
 #define STYLE ftxui::border | ftxui::color(ftxui::Color::Blue) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 50) | ftxui::center
 
