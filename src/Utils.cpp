@@ -17,7 +17,7 @@ bool isEmptyOrWhitespace(const std::string& str)
   return trim(str).empty();
 }
 
-u32 getCurrentTime()
+u64 getCurrentTime()
 {
   auto time = std::chrono::system_clock::now();
   auto dur = time.time_since_epoch();

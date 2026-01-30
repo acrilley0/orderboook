@@ -42,5 +42,5 @@ public:
   bool   addOrder(Order& order);
   Order* getOrder(u32 orderId);
   bool   modifyOrder(Order& order);
-  void   executeOrder(OrderBook& book);
+  void   executeOrder(Order& newOrder);
 };

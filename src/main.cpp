@@ -1,4 +1,5 @@
 #include "UserInterface.hpp"
+#include "Utils.hpp"
 #include <cstdlib>
 #include <memory>
 
@@ -15,10 +16,11 @@ int main()
 
   // Page 1: Create Book
   std::string symbol;
-  bool inserted = false;
-  bool bookCreationSuccessModal = false;
-  bool bookCreationFailureModal = false;
-  auto createBookPage = UserInterface::createBookPage(bookManager, symbol, symbolList, inserted, bookCreationSuccessModal, bookCreationFailureModal);
+  modal_info_t modal_info;
+  auto createBookPage = UserInterface::createBookPage(bookManager,
+                                                      symbol,
+                                                      symbolList,
+                                                      modal_info);
 
   std::vector<ftxui::Component> tabs = {mainMenu, createBookPage};
 
@@ -29,18 +31,13 @@ int main()
   // Page 3: Add Order Page
   std::string price;
   std::string qty;
-  int selectedSide = 0;
-  bool orderAddSuccessModal = false;
-  bool orderAddFailureModal = false;
 
   auto addOrderPage = UserInterface::addOrderPage(bookManager,
                                                   symbol,
                                                   price,
                                                   qty,
                                                   sides,
-                                                  selectedSide,
-                                                  orderAddSuccessModal,
-                                                  orderAddFailureModal);
+                                                  modal_info);
   tabs.push_back(addOrderPage);
 
   // Page 5: Display Book Page
@@ -50,24 +47,26 @@ int main()
   auto displayBookPage = UserInterface::displayBookPage(symbolList,
                                                         selectedSymbol,
                                                         displayBookInfoModal,
-                                                        currentSymbolForModal);
+                                                        currentSymbolForModal); // FIXME: Refactor this to use modal_info_t
   tabs.push_back(displayBookPage);
 
   auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
   auto withModals = allTabs;
-  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &bookCreationSuccessModal);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &bookCreationFailureModal);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &orderAddSuccessModal);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &orderAddFailureModal);
-  // withModals |= bookInfoModal;
+  // FIXME: The wrong text is getting shown for the book creation modal, i.e. "Order was successfully added"
+  // is being shown when a book is created successfully. This started happening after you began to use the
+  // modal_info_t struct
+  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &modal_info.book_success_modal_shown);
+  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &modal_info.book_failure_modal_shown);
+  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_success_modal_shown);
+  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_failure_modal_shown);
   withModals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbolList, selectedSymbol), &displayBookInfoModal);
 
   auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
-        !bookCreationSuccessModal &&
-        !bookCreationFailureModal &&
-        !orderAddSuccessModal &&
-        !orderAddFailureModal &&
+        !modal_info.book_success_modal_shown &&
+        !modal_info.book_failure_modal_shown &&
+        !modal_info.order_success_modal_shown &&
+        !modal_info.order_failure_modal_shown &&
         !displayBookInfoModal) {
       currentPage = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
@@ -78,20 +77,20 @@ int main()
     }
 
     if (event == ftxui::Event::Return) {
-      if (bookCreationSuccessModal) {
-        bookCreationSuccessModal = false;
+      if (modal_info.book_success_modal_shown) {
+        modal_info.book_success_modal_shown = false;
         return true;
       }
-      if (bookCreationFailureModal) {
-        bookCreationFailureModal = false;
+      if (modal_info.book_failure_modal_shown) {
+        modal_info.book_failure_modal_shown = false;
         return true;
       }
-      if (orderAddSuccessModal) {
-        orderAddSuccessModal = false;
+      if (modal_info.order_success_modal_shown) {
+        modal_info.order_success_modal_shown = false;
         return true;
       }
-      if (orderAddFailureModal) {
-        orderAddFailureModal = false;
+      if (modal_info.order_failure_modal_shown) {
+        modal_info.order_failure_modal_shown = false;
         return true;
       }
       if (displayBookInfoModal) {

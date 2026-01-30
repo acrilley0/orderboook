@@ -1,9 +1,9 @@
 #include "UserInterface.hpp"
+#include "Utils.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/dom/node.hpp>
-#include <stdexcept>
 
 ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOptionSelected)
 {
@@ -44,23 +44,22 @@ ftxui::Component UserInterface::createMainMenu(int& currentPage, int &menuOption
 }
 
 ftxui::Component UserInterface::createBookPage(OrderBookManager& bookManager,
-                                               std::string& symbol,
-                                               std::vector<std::string>& symbolList,
-                                               bool& inserted,
-                                               bool& successModalShown,
-                                               bool& failureModalShown)
+                                std::string& symbol,
+                                std::vector<std::string>& symbolList,
+                                modal_info_t& modal_info)
 {
   ftxui::InputOption inputOption;
   inputOption.multiline = false;
-  inputOption.on_enter = [&bookManager, &symbol, &symbolList, &inserted, &successModalShown, &failureModalShown] {
+
+  inputOption.on_enter = [&bookManager, &symbol, &symbolList, &modal_info] {
     std::string trimmed = trim(symbol);
     if (!trimmed.empty()) {
-      inserted = bookManager.initBook(trimmed);
-      if (inserted) {
+      modal_info.inserted = bookManager.initBook(trimmed);
+      if (modal_info.inserted) {
         symbolList.push_back(trimmed);
-        successModalShown = true;
+        modal_info.book_success_modal_shown = true;
       } else {
-        failureModalShown = true;
+        modal_info.book_failure_modal_shown = true;
       }
       symbol.clear();
     }
@@ -107,16 +106,14 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
                                              std::string& priceStr,
                                              std::string& quantityStr,
                                              const std::vector<std::string>& sides,
-                                             int& selectedSide,
-                                             bool& successModalShown,
-                                             bool& failureModalShown)
+                                             modal_info_t& modal_info)
 {
   ftxui::InputOption inputOptions;
   inputOptions.multiline = false;
 
   inputOptions.on_enter = [&] {
     if (symbol.empty() || priceStr.empty() || quantityStr.empty()) {
-      failureModalShown = true;
+      modal_info.order_failure_modal_shown = true;
       return;
     }
 
@@ -124,7 +121,7 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
     try {
       book = bookManager.getBook(symbol);
     } catch (std::out_of_range&) {
-      failureModalShown = true;
+      modal_info.order_failure_modal_shown = true;
       return;
     }
 
@@ -132,14 +129,14 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
                            std::atoi(quantityStr.c_str()),
                            std::atof(priceStr.c_str()),
                            getCurrentTime(),
-                           static_cast<Side>(selectedSide),
+                           static_cast<Side>(modal_info.selected_side),
                            symbol);
 
     bool orderAdded = book->addOrder(newOrder);
     if (orderAdded) {
-      successModalShown = true;
+      modal_info.order_success_modal_shown = true;
     } else {
-      failureModalShown = true;
+      modal_info.order_failure_modal_shown = true;
     }
   };
 
@@ -165,7 +162,7 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
   });
   quantityContainer->SetActiveChild(quantityInput);
 
-  auto sideContainer = ftxui::Radiobox(&sides, &selectedSide);
+  auto sideContainer = ftxui::Radiobox(&sides, &modal_info.selected_side);
 
   auto inputContainer = ftxui::Container::Vertical({
     ftxui::Renderer([] {
@@ -235,6 +232,7 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
 
     return ftxui::vbox({
       ftxui::text("Symbol: " + book->symbol) | ftxui::color(ftxui::Color::Green3) | ftxui::bold | ftxui::center,
+      ftxui::separator(),
       ftxui::text("BIDS") | ftxui::color(ftxui::Color::Green3) | ftxui::bold,
       ftxui::separator(),
       ftxui::vbox(bidLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),

@@ -41,18 +41,14 @@ public:
   static ftxui::Component createBookPage(OrderBookManager& bookManager,
                                          std::string& symbol,
                                          std::vector<std::string>& symbolList,
-                                         bool& inserted,
-                                         bool& successModalShown,
-                                         bool& failureModalShown);
+                                         modal_info_t& modal_info);
   static ftxui::Component listBooksPage(std::vector<std::string>& symbols);
   static ftxui::Component addOrderPage(OrderBookManager& bookManager,
                                        std::string& symbol,
                                        std::string& priceStr,
                                        std::string& quantityStr,
                                        const std::vector<std::string>& sides,
-                                       int& selectedSide,
-                                       bool& successModalShown,
-                                       bool& failureModalShown);
+                                       modal_info_t& modal_info);
   static ftxui::Component printBookInfoModal(OrderBookManager& bookManager,
                                              const std::vector<std::string>& symboLlist,
                                              int& symboLIndex);

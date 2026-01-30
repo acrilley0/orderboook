@@ -20,7 +20,7 @@ public:
   Order(u32 orderId,
         u32 quantity,
         double price,
-        time_t timestamp,
+        u64 timestamp,
         Side side,
         std::string symbol) :
     orderId(orderId),
