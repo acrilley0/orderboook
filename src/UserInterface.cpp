@@ -248,15 +248,14 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
 
 ftxui::Component UserInterface::displayBookPage(std::vector<std::string>& symbolList,
                                                 int& selectedSymbol,
-                                                bool& displayBookInfoModal,
-                                                std::string& currentSymbolForModal)
+                                                modal_info_t& modal_info)
 {
   ftxui::MenuOption menuOptions = {
     ftxui::MenuOption::Vertical(),
   };
   menuOptions.on_enter = [&] {
-    currentSymbolForModal = symbolList[selectedSymbol];
-    displayBookInfoModal = true;
+    modal_info.current_symbol_for_modal = symbolList[selectedSymbol];
+    modal_info.book_info_modal_shown = true;
   };
 
   auto list = ftxui::Menu(&symbolList, &selectedSymbol, menuOptions);

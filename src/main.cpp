@@ -5,74 +5,70 @@
 
 int main()
 {
-  OrderBookManager bookManager = OrderBookManager();
+  OrderBookManager book_manager = OrderBookManager();
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
-  int currentPage = static_cast<int>(Page::MAIN_MENU);
-  int menuOptionSelected = 0;
-  std::vector<std::string> symbolList;
-  auto mainMenu = UserInterface::createMainMenu(currentPage, menuOptionSelected);
+  int current_page = static_cast<int>(Page::MAIN_MENU);
+  int menu_option_selected = 0;
+  std::vector<std::string> symbol_list;
+  auto main_menu = UserInterface::createMainMenu(current_page, menu_option_selected);
 
   // Page 1: Create Book
   std::string symbol;
   modal_info_t modal_info;
-  auto createBookPage = UserInterface::createBookPage(bookManager,
-                                                      symbol,
-                                                      symbolList,
-                                                      modal_info);
+  auto create_book_page = UserInterface::createBookPage(book_manager,
+                                                        symbol,
+                                                        symbol_list,
+                                                        modal_info);
 
-  std::vector<ftxui::Component> tabs = {mainMenu, createBookPage};
+  std::vector<ftxui::Component> tabs = {main_menu, create_book_page};
 
   // Page 2: List Books
-  auto bookListPage = UserInterface::listBooksPage(symbolList);
-  tabs.push_back(bookListPage);
+  auto book_list_page = UserInterface::listBooksPage(symbol_list);
+  tabs.push_back(book_list_page);
 
   // Page 3: Add Order Page
   std::string price;
   std::string qty;
 
-  auto addOrderPage = UserInterface::addOrderPage(bookManager,
-                                                  symbol,
-                                                  price,
-                                                  qty,
-                                                  sides,
-                                                  modal_info);
-  tabs.push_back(addOrderPage);
+  auto add_order_page = UserInterface::addOrderPage(book_manager,
+                                                    symbol,
+                                                    price,
+                                                    qty,
+                                                    sides,
+                                                    modal_info);
+  tabs.push_back(add_order_page);
 
   // Page 5: Display Book Page
-  int selectedSymbol = 0;
-  bool displayBookInfoModal = false;
-  std::string currentSymbolForModal;
-  auto displayBookPage = UserInterface::displayBookPage(symbolList,
-                                                        selectedSymbol,
-                                                        displayBookInfoModal,
-                                                        currentSymbolForModal); // FIXME: Refactor this to use modal_info_t
-  tabs.push_back(displayBookPage);
+  int selected_symbol = 0;
+  bool display_book_info_modal = false;
+  auto display_book_page = UserInterface::displayBookPage(symbol_list,
+                                                          selected_symbol,
+                                                          modal_info);
+  tabs.push_back(display_book_page);
 
-  auto allTabs = ftxui::Container::Tab(tabs, &currentPage);
-  auto withModals = allTabs;
-  // FIXME: The wrong text is getting shown for the book creation modal, i.e. "Order was successfully added"
-  // is being shown when a book is created successfully. This started happening after you began to use the
-  // modal_info_t struct
-  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &modal_info.book_success_modal_shown);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &modal_info.book_failure_modal_shown);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_success_modal_shown);
-  withModals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_failure_modal_shown);
-  withModals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbolList, selectedSymbol), &displayBookInfoModal);
+  auto all_tabs = ftxui::Container::Tab(tabs, &current_page);
+  auto tabs_with_modals = all_tabs;
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &modal_info.book_success_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &modal_info.book_failure_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_success_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_failure_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(book_manager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
 
-  auto finalContainer = ftxui::CatchEvent(withModals, [&](ftxui::Event event) {
+  auto final_container = ftxui::CatchEvent(tabs_with_modals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
-        !modal_info.book_success_modal_shown &&
-        !modal_info.book_failure_modal_shown &&
-        !modal_info.order_success_modal_shown &&
-        !modal_info.order_failure_modal_shown &&
-        !displayBookInfoModal) {
-      currentPage = static_cast<int>(Page::MAIN_MENU); // Return to main menu
+      !modal_info.book_success_modal_shown &&
+      !modal_info.book_failure_modal_shown &&
+      !modal_info.order_success_modal_shown &&
+      !modal_info.order_failure_modal_shown &&
+      !modal_info.book_info_modal_shown &&
+      !display_book_info_modal) {
+      current_page = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
     }
 
-    if (event == ftxui::Event::Escape && currentPage == static_cast<int>(Page::MAIN_MENU)) {
+    if (event == ftxui::Event::Escape && current_page == static_cast<int>(Page::MAIN_MENU)) {
       // If the user hits Escape at the main menu, it should warn them that they are about to quit
     }
 
@@ -93,8 +89,8 @@ int main()
         modal_info.order_failure_modal_shown = false;
         return true;
       }
-      if (displayBookInfoModal) {
-        displayBookInfoModal = false;
+      if (modal_info.book_info_modal_shown) {
+        modal_info.book_info_modal_shown = false;
         return true;
       }
       return false;
@@ -102,7 +98,7 @@ int main()
     return false;
   });
 
-  screen.Loop(finalContainer);
+  screen.Loop(final_container);
 
   return EXIT_SUCCESS;
 }
