@@ -35,6 +35,11 @@ struct modal_info_t {
   }
 };
 
+typedef enum {
+  SUCCESS,
+  FAILURE,
+} book_modification_result_t;
+
 const std::vector<std::string> sides = {"BID", "ASK"};
 
 std::string trim(const std::string& str);

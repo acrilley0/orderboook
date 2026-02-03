@@ -6,24 +6,27 @@ typedef enum {
   ASK,
 } Side;
 
+typedef enum {
+} order_type_t;
+
 class Order {
 public:
-  u32         orderId;
-  u32         quantity;
-  double      price;
-  u64         timestamp;
-  Side        side;
+  u32          order_id;
+  u32          quantity;
+  double       price;
+  u64          timestamp;
+  Side         side;
+  order_type_t order_type;
   std::string symbol;
-  // Order type?
   // Priority?
 
-  Order(u32 orderId,
+  Order(u32 order_id,
         u32 quantity,
         double price,
         u64 timestamp,
         Side side,
         std::string symbol) :
-    orderId(orderId),
+    order_id(order_id),
     quantity(quantity),
     price(price),
     timestamp(timestamp),

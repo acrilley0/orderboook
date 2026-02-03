@@ -5,7 +5,7 @@
 
 int main()
 {
-  OrderBookManager book_manager = OrderBookManager();
+  OrderBookManager bookManager = OrderBookManager();
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
@@ -17,7 +17,7 @@ int main()
   // Page 1: Create Book
   std::string symbol;
   modal_info_t modal_info;
-  auto create_book_page = UserInterface::createBookPage(book_manager,
+  auto create_book_page = UserInterface::createBookPage(bookManager,
                                                         symbol,
                                                         symbol_list,
                                                         modal_info);
@@ -32,7 +32,7 @@ int main()
   std::string price;
   std::string qty;
 
-  auto add_order_page = UserInterface::addOrderPage(book_manager,
+  auto add_order_page = UserInterface::addOrderPage(bookManager,
                                                     symbol,
                                                     price,
                                                     qty,
@@ -54,7 +54,7 @@ int main()
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &modal_info.book_failure_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_success_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_failure_modal_shown);
-  tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(book_manager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
 
   auto final_container = ftxui::CatchEvent(tabs_with_modals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
