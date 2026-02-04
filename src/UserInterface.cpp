@@ -132,8 +132,8 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
                            static_cast<Side>(modal_info.selected_side),
                            symbol);
 
-    bool orderAdded = book->addOrder(newOrder);
-    if (orderAdded) {
+    OrderBook::order_execution_result_t result = book->addOrder(newOrder);
+    if (result == OrderBook::ORDER_ADDED) {
       modal_info.order_success_modal_shown = true;
     } else {
       modal_info.order_failure_modal_shown = true;
