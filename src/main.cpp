@@ -52,16 +52,20 @@ int main()
   auto tabs_with_modals = all_tabs;
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Book was created!"), &modal_info.book_success_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to create book!"), &modal_info.book_failure_modal_shown);
-  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_success_modal_shown);
-  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_failure_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Order was added successfully!"), &modal_info.order_add_success_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_add_failure_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was partially filled!"), &modal_info.order_partially_filled_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was totally filled!"), &modal_info.order_filled_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
 
   auto final_container = ftxui::CatchEvent(tabs_with_modals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
       !modal_info.book_success_modal_shown &&
       !modal_info.book_failure_modal_shown &&
-      !modal_info.order_success_modal_shown &&
-      !modal_info.order_failure_modal_shown &&
+      !modal_info.order_add_success_modal_shown &&
+      !modal_info.order_add_failure_modal_shown &&
+      !modal_info.order_partially_filled_modal_shown &&
+      !modal_info.order_filled_modal_shown &&
       !modal_info.book_info_modal_shown &&
       !display_book_info_modal) {
       current_page = static_cast<int>(Page::MAIN_MENU); // Return to main menu
@@ -81,13 +85,19 @@ int main()
         modal_info.book_failure_modal_shown = false;
         return true;
       }
-      if (modal_info.order_success_modal_shown) {
-        modal_info.order_success_modal_shown = false;
+      if (modal_info.order_add_success_modal_shown) {
+        modal_info.order_add_success_modal_shown = false;
         return true;
       }
-      if (modal_info.order_failure_modal_shown) {
-        modal_info.order_failure_modal_shown = false;
+      if (modal_info.order_add_failure_modal_shown) {
+        modal_info.order_add_failure_modal_shown = false;
         return true;
+      }
+      if (modal_info.order_partially_filled_modal_shown) {
+        modal_info.order_partially_filled_modal_shown = false;
+      }
+      if (modal_info.order_filled_modal_shown) {
+        modal_info.order_filled_modal_shown = false;
       }
       if (modal_info.book_info_modal_shown) {
         modal_info.book_info_modal_shown = false;

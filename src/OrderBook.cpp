@@ -13,15 +13,17 @@ OrderBook::order_execution_result_t OrderBook::addOrder(Order& order)
     return ORDER_REJECTED;
   }
 
-  order_execution_result_t result = executeOrder(order); // FIXME: Placeholder until I develop the logic here
+  order_execution_result_t result = executeOrder(order);
 
-  if (order.side == BID) {
-    std::tie(std::ignore, inserted) = bids[order.price].insert(order);
-  } else if (order.side == ASK) {
-    std::tie(std::ignore, inserted) = asks[order.price].insert(order);
+  if (result != ORDER_FILL) {
+    if (order.side == BID) {
+      std::tie(std::ignore, inserted) = bids[order.price].insert(order);
+    } else if (order.side == ASK) {
+      std::tie(std::ignore, inserted) = asks[order.price].insert(order);
+    }
   }
 
-  return inserted ? ORDER_ADDED : ORDER_REJECTED;
+  return result;
 }
 
 Order* OrderBook::getOrder(const u32 order_id)
@@ -50,7 +52,8 @@ book_modification_result_t OrderBook::removeOrder_(const u32 order_id)
 
 OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
 {
-
+  // FIXME: The current solution does not allow an incoming order to be matched
+  // against multiple sitting orders. Is that something I want?
   switch (newOrder.side) {
     case BID: {
       // If the incoming order is a BID, we want to check if there are any matching asks
@@ -66,10 +69,10 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
           } else if (newOrder.quantity < ask.quantity) {
             Order& askr = const_cast<Order&>(ask);
             askr.quantity -= newOrder.quantity;
-            outfile << "PARTIAL FILLED AN ASK - id: " << askr.order_id << " remaining quantity: " << askr.quantity << std::endl;
             return ORDER_FILL;
           } else if (newOrder.quantity > ask.quantity) {
-            // result = removeOrder_(ask.order_id);
+            newOrder.quantity -= ask.quantity;
+            removeOrder_(ask.order_id);
             return ORDER_PARTIAL_FILL;
           }
         }
@@ -94,10 +97,10 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
           } else if (newOrder.quantity < bid.quantity) {
             Order& bidr = const_cast<Order&>(bid);
             bidr.quantity -= newOrder.quantity;
-            outfile << "PARTIAL FILLED A BID - id: " << bidr.order_id << " remaining quantity: " << bidr.quantity << std::endl;
             return ORDER_FILL;
           } else if (newOrder.quantity > bid.quantity) {
-            // result = removeOrder_(bid.order_id);
+            newOrder.quantity -= bid.quantity;
+            removeOrder_(bid.order_id);
             return ORDER_PARTIAL_FILL;
           }
         }

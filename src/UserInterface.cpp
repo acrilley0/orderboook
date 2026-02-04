@@ -113,7 +113,7 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
 
   inputOptions.on_enter = [&] {
     if (symbol.empty() || priceStr.empty() || quantityStr.empty()) {
-      modal_info.order_failure_modal_shown = true;
+      modal_info.order_add_failure_modal_shown = true;
       return;
     }
 
@@ -121,7 +121,7 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
     try {
       book = bookManager.getBook(symbol);
     } catch (std::out_of_range&) {
-      modal_info.order_failure_modal_shown = true;
+      modal_info.order_add_failure_modal_shown = true;
       return;
     }
 
@@ -134,9 +134,11 @@ ftxui::Component UserInterface::addOrderPage(OrderBookManager& bookManager,
 
     OrderBook::order_execution_result_t result = book->addOrder(newOrder);
     if (result == OrderBook::ORDER_ADDED) {
-      modal_info.order_success_modal_shown = true;
-    } else {
-      modal_info.order_failure_modal_shown = true;
+      modal_info.order_add_success_modal_shown = true;
+    } else if (result == OrderBook::ORDER_PARTIAL_FILL){
+      modal_info.order_partially_filled_modal_shown = true;
+    } else if (result == OrderBook::ORDER_FILL) {
+      modal_info.order_filled_modal_shown = true;
     }
   };
 

@@ -18,8 +18,10 @@ struct modal_info_t {
   // for the book creation and add order pages
   bool book_success_modal_shown;
   bool book_failure_modal_shown;
-  bool order_success_modal_shown;
-  bool order_failure_modal_shown;
+  bool order_add_success_modal_shown;
+  bool order_add_failure_modal_shown;
+  bool order_filled_modal_shown;
+  bool order_partially_filled_modal_shown;
   bool book_info_modal_shown;
   std::string current_symbol_for_modal; // Tracks which symbol book info (bids and asks) should be displayed for
 
@@ -28,8 +30,10 @@ struct modal_info_t {
     selected_side = 0;
     book_success_modal_shown = false;
     book_failure_modal_shown = false;
-    order_success_modal_shown = false;
-    order_failure_modal_shown = false;
+    order_add_success_modal_shown = false;
+    order_add_failure_modal_shown = false;
+    order_filled_modal_shown = false;
+    order_partially_filled_modal_shown = false;
     book_info_modal_shown = false;
     current_symbol_for_modal = "";
   }
