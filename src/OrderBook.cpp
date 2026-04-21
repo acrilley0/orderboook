@@ -49,8 +49,6 @@ void OrderBook::removeOrder(const u32 order_id, Side side)
 
 OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
 {
-  // FIXME: The current solution does not allow an incoming order to be matched
-  // against multiple sitting orders. Is that something I want?
   switch (newOrder.side) {
     case BID: {
       // If the incoming order is a BID, we want to check if there are any matching asks
@@ -59,11 +57,23 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
         book_modification_result_t result = SUCCESS;
         ask_map_t& matching_asks = asks.at(newOrder.price);
 
-        for (auto& ask : matching_asks) {
-          if (ask.quantity == newOrder.quantity) {
-            removeOrder(ask.order_id, ASK);
+        for (auto iter = matching_asks.begin(); iter != matching_asks.end();) {
+          if (iter->quantity == newOrder.quantity) {
+            removeOrder(iter->order_id, ASK);
             return ORDER_FILL;
+          } else if (iter->quantity > newOrder.quantity) {
+            iter->quantity -= newOrder.quantity;
+            return ORDER_FILL;
+          } else if (iter->quantity < newOrder.quantity) {
+            auto next = std::next(iter);
+            removeOrder(iter->order_id, ASK);
+            if (asks.count(newOrder.price) == 0) { break; }
+            iter = next;
           }
+        }
+
+        if (newOrder.quantity > 0) {
+          return ORDER_PARTIAL_FILL;
         }
       } catch (std::out_of_range&) {
         // No match found
@@ -79,11 +89,24 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
         book_modification_result_t result = SUCCESS;
         bid_map_t& matching_bids = bids.at(newOrder.price);
 
-        for (auto& bid : matching_bids) {
-          if (bid.price == newOrder.price) {
-            removeOrder(bid.order_id, BID);
+        for (auto iter = matching_bids.begin(); iter != matching_bids.end();) {
+          if (iter->quantity == newOrder.quantity) {
+            removeOrder(iter->order_id, BID);
             return ORDER_FILL;
+          } else if (iter->quantity > newOrder.quantity) {
+            iter->quantity -= newOrder.quantity;
+            return ORDER_FILL;
+          } else if (iter->quantity < newOrder.quantity) {
+            newOrder.quantity -= iter->quantity;
+            auto next = std::next(iter);
+            removeOrder(iter->order_id, BID);
+            if (bids.count(newOrder.price) == 0) { break; }
+            iter = next;
           }
+        }
+
+        if (newOrder.quantity > 0) {
+          return ORDER_PARTIAL_FILL;
         }
       } catch (std::out_of_range&) {
         // No match found

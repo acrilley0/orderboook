@@ -242,7 +242,7 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& bookManager
       ftxui::text("ASKS") | ftxui::color(ftxui::Color::Green3)| ftxui::bold,
       ftxui::separator(),
       ftxui::vbox(askLevels) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 80) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 80),
-    }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 75) | ftxui::border;
+    }) | ftxui::size(ftxui::WIDTH, ftxui::EQUAL, 75) | ftxui::size(ftxui::HEIGHT, ftxui::EQUAL, 40) | ftxui::border;
   });
 
   return bookInfoRenderer;
