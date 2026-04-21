@@ -3,11 +3,10 @@
 #include <unordered_map>
 #include "Order.hpp"
 #include "Utils.hpp"
+#include <list>
 
 class OrderBook {
 private:
-  std::unordered_map<u32 /* order_id */, Order> global_order_index_;
-
   struct OrderPtrHash {
     size_t operator()(const Order& order) const {
       size_t h1 = std::hash<u32>{}(order.order_id);
@@ -27,8 +26,9 @@ private:
 public:
   std::string symbol;
 
-  std::map<double, std::unordered_set<Order, OrderPtrHash, OrderPtrEqual>, std::greater<double>> bids;
-  std::map<double, std::unordered_set<Order, OrderPtrHash, OrderPtrEqual>, std::less<double>> asks;
+  std::map<double, std::list<Order>, std::greater<double>> bids;
+  std::map<double, std::list<Order>, std::less<double>> asks;
+  std::unordered_map<u32, std::list<Order>::iterator> order_index;
 
   typedef enum {
     ORDER_ADDED,
@@ -49,19 +49,7 @@ public:
     asks = {};
   }
   order_execution_result_t addOrder(Order& order);
-  Order*                   getOrder(const u32 order_id);
+  Order&                   getOrder(const u32 order_id);
   order_execution_result_t executeOrder(Order& newOrder);
-
-  template <typename Order, typename Orders>
-  book_modification_result_t remove_order(const u32 order_id, Order* order, Orders& orders) {
-    auto iter = orders.find(*order);
-    if (iter != orders.end()) {
-      orders.erase(*order);
-    }
-
-    auto num_erased = global_order_index_.erase(order_id);
-
-    return num_erased ? SUCCESS : FAILURE;
-  }
-
+  void                     removeOrder(const u32 order_id, Side side);
 };

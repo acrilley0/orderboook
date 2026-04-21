@@ -7,47 +7,44 @@ std::ofstream outfile("log.txt");
 
 OrderBook::order_execution_result_t OrderBook::addOrder(Order& order)
 {
-  bool inserted = false;
-  std::tie(std::ignore, inserted) = global_order_index_.insert({order.order_id, order});
-  if (!inserted) {
-    return ORDER_REJECTED;
-  }
-
   order_execution_result_t result = executeOrder(order);
 
   if (result != ORDER_FILL) {
     if (order.side == BID) {
-      std::tie(std::ignore, inserted) = bids[order.price].insert(order);
+      bids[order.price].push_back(order);
+      order_index[order.order_id] = std::prev(bids[order.price].end());
     } else if (order.side == ASK) {
-      std::tie(std::ignore, inserted) = asks[order.price].insert(order);
+      asks[order.price].push_back(order);
+      order_index[order.order_id] = std::prev(asks[order.price].end());
     }
   }
 
   return result;
 }
 
-Order* OrderBook::getOrder(const u32 order_id)
+Order& OrderBook::getOrder(const u32 order_id)
 {
-  auto iter = global_order_index_.find(order_id);
-  if (iter == global_order_index_.end()) {
-    return nullptr;
-  }
-
-  return &iter->second;
+  auto iter = order_index.at(order_id);
+  return *iter;
 }
 
-book_modification_result_t OrderBook::removeOrder_(const u32 order_id)
+void OrderBook::removeOrder(const u32 order_id, Side side)
 {
-  Order* global_order = getOrder(order_id);
-  if (global_order == nullptr) {
-    return FAILURE;
+  auto iter = order_index.at(order_id);
+  u32 price = iter->price;
+  if (side == BID) {
+    bids[iter->price].erase(iter);
+    if (bids[price].empty()) {
+      bids.erase(price);
+    }
+  } else {
+    asks[iter->price].erase(iter);
+    if (asks[price].empty()) {
+      asks.erase(price);
+    }
   }
 
-  if (global_order->side == BID) {
-    return remove_order(order_id, global_order,  bids.at(global_order->price));
-  } else {
-    return remove_order(order_id, global_order, asks.at(global_order->price));
-  }
+  order_index.erase(order_id);
 }
 
 OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
@@ -63,17 +60,9 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
         ask_map_t& matching_asks = asks.at(newOrder.price);
 
         for (auto& ask : matching_asks) {
-          if (newOrder.quantity == ask.quantity) {
-            result = removeOrder_(ask.order_id);
+          if (ask.quantity == newOrder.quantity) {
+            removeOrder(ask.order_id, ASK);
             return ORDER_FILL;
-          } else if (newOrder.quantity < ask.quantity) {
-            Order& askr = const_cast<Order&>(ask);
-            askr.quantity -= newOrder.quantity;
-            return ORDER_FILL;
-          } else if (newOrder.quantity > ask.quantity) {
-            newOrder.quantity -= ask.quantity;
-            removeOrder_(ask.order_id);
-            return ORDER_PARTIAL_FILL;
           }
         }
       } catch (std::out_of_range&) {
@@ -91,17 +80,9 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
         bid_map_t& matching_bids = bids.at(newOrder.price);
 
         for (auto& bid : matching_bids) {
-          if (newOrder.quantity == bid.quantity) {
-            result = removeOrder_(bid.order_id);
+          if (bid.price == newOrder.price) {
+            removeOrder(bid.order_id, BID);
             return ORDER_FILL;
-          } else if (newOrder.quantity < bid.quantity) {
-            Order& bidr = const_cast<Order&>(bid);
-            bidr.quantity -= newOrder.quantity;
-            return ORDER_FILL;
-          } else if (newOrder.quantity > bid.quantity) {
-            newOrder.quantity -= bid.quantity;
-            removeOrder_(bid.order_id);
-            return ORDER_PARTIAL_FILL;
           }
         }
       } catch (std::out_of_range&) {
