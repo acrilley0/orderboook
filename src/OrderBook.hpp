@@ -52,4 +52,5 @@ public:
   Order&                   getOrder(const u32 order_id);
   order_execution_result_t executeOrder(Order& newOrder);
   void                     removeOrder(const u32 order_id, Side side);
+  u32                      getNumOrders(const Side side);
 };

@@ -118,3 +118,17 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
 
   return ORDER_ADDED;
 }
+
+u32 OrderBook::getNumOrders(const Side side)
+{
+  switch (side) {
+    case BID: {
+      return bids.size();
+      break;
+    }
+    case ASK: {
+      return asks.size();
+      break;
+    }
+  }
+}
