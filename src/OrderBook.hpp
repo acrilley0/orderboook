@@ -49,8 +49,8 @@ public:
     asks = {};
   }
   order_execution_result_t addOrder(Order& order);
-  Order&                   getOrder(const u32 order_id);
+  Order&                   getOrder(const u32 order_id) const;
   order_execution_result_t executeOrder(Order& newOrder);
   void                     removeOrder(const u32 order_id, Side side);
-  u32                      getNumOrders(const Side side);
+  u32                      getNumOrders(const Side side) const;
 };

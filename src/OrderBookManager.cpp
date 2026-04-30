@@ -9,12 +9,12 @@ bool OrderBookManager::initBook(const std::string& symbol)
   return inserted;
 }
 
-OrderBook* OrderBookManager::getBook(const std::string& symbol)
+OrderBook* OrderBookManager::getBook(const std::string& symbol) const
 {
   return books.at(symbol).get();
 }
 
-size_t OrderBookManager::getNumBooks()
+size_t OrderBookManager::getNumBooks() const
 {
   return books.size();
 }

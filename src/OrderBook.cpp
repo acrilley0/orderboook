@@ -22,7 +22,7 @@ OrderBook::order_execution_result_t OrderBook::addOrder(Order& order)
   return result;
 }
 
-Order& OrderBook::getOrder(const u32 order_id)
+Order& OrderBook::getOrder(const u32 order_id) const
 {
   auto iter = order_index.at(order_id);
   return *iter;
@@ -54,7 +54,6 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
       // If the incoming order is a BID, we want to check if there are any matching asks
       using ask_map_t = decltype(asks)::value_type::second_type;
       try {
-        book_modification_result_t result = SUCCESS;
         ask_map_t& matching_asks = asks.at(newOrder.price);
 
         for (auto iter = matching_asks.begin(); iter != matching_asks.end();) {
@@ -86,7 +85,6 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
       // If the incoming order is a ASK, we want to check if there are any matching bids
       using bid_map_t = decltype(bids)::value_type::second_type;
       try {
-        book_modification_result_t result = SUCCESS;
         bid_map_t& matching_bids = bids.at(newOrder.price);
 
         for (auto iter = matching_bids.begin(); iter != matching_bids.end();) {
@@ -119,16 +117,7 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
   return ORDER_ADDED;
 }
 
-u32 OrderBook::getNumOrders(const Side side)
+u32 OrderBook::getNumOrders(const Side side) const
 {
-  switch (side) {
-    case BID: {
-      return bids.size();
-      break;
-    }
-    case ASK: {
-      return asks.size();
-      break;
-    }
-  }
+  return side == BID ? bids.size() : asks.size();
 }
