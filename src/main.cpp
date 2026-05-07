@@ -1,10 +1,13 @@
 #include "UserInterface.hpp"
 #include "Utils.hpp"
+#include "SecurityReference.hpp"
 #include <cstdlib>
 #include <memory>
 
 int main()
 {
+  SecurityReference::InitTable();
+
   OrderBookManager bookManager = OrderBookManager();
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();

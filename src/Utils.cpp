@@ -25,3 +25,18 @@ u64 getCurrentTime()
 
   return time_ms;
 }
+
+bool tableExists(pqxx::connection &c, const std::string &table_name) {
+  pqxx::nontransaction tx(c); // Read only transaction
+
+  std::string query =
+    "SELECT EXISTS ("
+    " SELECT FROM information_schema.tables "
+    " WHERE table_schema = 'public' "
+    " AND table_name = " + tx.quote(table_name) +
+    ")";
+
+  pqxx::result res = tx.exec(query);
+
+  return res[0][0].as<bool>();
+}

@@ -44,6 +44,7 @@ set(SOURCES
     src/OrderBook.cpp
     src/OrderBookManager.cpp
     src/UserInterface.cpp
+    src/SecurityReference.cpp
     src/Utils.cpp
 )
 add_executable(orderbook ${SOURCES})
@@ -52,10 +53,21 @@ target_include_directories(orderbook PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set_target_properties(orderbook PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin
 )
+
+FetchContent_Declare(
+  libpqxx
+  GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+  GIT_TAG        7.10.0
+  GIT_SHALLOW    TRUE
+  EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(libpqxx)
+
 target_link_libraries(orderbook
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
+  PRIVATE libpqxx::pqxx
 )
 
 # --- Test Configuration --------------------------------------------------------
@@ -76,6 +88,7 @@ set_target_properties(orderbook_tests PROPERTIES
 )
 target_link_libraries(orderbook_tests
   PRIVATE GTest::gtest_main
+  PRIVATE libpqxx::pqxx
 )
 
 gtest_discover_tests(orderbook_tests)
