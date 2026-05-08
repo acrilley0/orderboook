@@ -47,31 +47,31 @@ void OrderBook::removeOrder(const u32 order_id, Side side)
   order_index.erase(order_id);
 }
 
-OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
+OrderBook::order_execution_result_t OrderBook::executeOrder(Order& new_order)
 {
-  switch (newOrder.side) {
+  switch (new_order.side) {
     case BID: {
       // If the incoming order is a BID, we want to check if there are any matching asks
       using ask_map_t = decltype(asks)::value_type::second_type;
       try {
-        ask_map_t& matching_asks = asks.at(newOrder.price);
+        ask_map_t& matching_asks = asks.at(new_order.price);
 
         for (auto iter = matching_asks.begin(); iter != matching_asks.end();) {
-          if (iter->quantity == newOrder.quantity) {
+          if (iter->quantity == new_order.quantity) {
             removeOrder(iter->order_id, ASK);
             return ORDER_FILL;
-          } else if (iter->quantity > newOrder.quantity) {
-            iter->quantity -= newOrder.quantity;
+          } else if (iter->quantity > new_order.quantity) {
+            iter->quantity -= new_order.quantity;
             return ORDER_FILL;
-          } else if (iter->quantity < newOrder.quantity) {
+          } else if (iter->quantity < new_order.quantity) {
             auto next = std::next(iter);
             removeOrder(iter->order_id, ASK);
-            if (asks.count(newOrder.price) == 0) { break; }
+            if (asks.count(new_order.price) == 0) { break; }
             iter = next;
           }
         }
 
-        if (newOrder.quantity > 0) {
+        if (new_order.quantity > 0) {
           return ORDER_PARTIAL_FILL;
         }
       } catch (std::out_of_range&) {
@@ -85,25 +85,25 @@ OrderBook::order_execution_result_t OrderBook::executeOrder(Order& newOrder)
       // If the incoming order is a ASK, we want to check if there are any matching bids
       using bid_map_t = decltype(bids)::value_type::second_type;
       try {
-        bid_map_t& matching_bids = bids.at(newOrder.price);
+        bid_map_t& matching_bids = bids.at(new_order.price);
 
         for (auto iter = matching_bids.begin(); iter != matching_bids.end();) {
-          if (iter->quantity == newOrder.quantity) {
+          if (iter->quantity == new_order.quantity) {
             removeOrder(iter->order_id, BID);
             return ORDER_FILL;
-          } else if (iter->quantity > newOrder.quantity) {
-            iter->quantity -= newOrder.quantity;
+          } else if (iter->quantity > new_order.quantity) {
+            iter->quantity -= new_order.quantity;
             return ORDER_FILL;
-          } else if (iter->quantity < newOrder.quantity) {
-            newOrder.quantity -= iter->quantity;
+          } else if (iter->quantity < new_order.quantity) {
+            new_order.quantity -= iter->quantity;
             auto next = std::next(iter);
             removeOrder(iter->order_id, BID);
-            if (bids.count(newOrder.price) == 0) { break; }
+            if (bids.count(new_order.price) == 0) { break; }
             iter = next;
           }
         }
 
-        if (newOrder.quantity > 0) {
+        if (new_order.quantity > 0) {
           return ORDER_PARTIAL_FILL;
         }
       } catch (std::out_of_range&) {

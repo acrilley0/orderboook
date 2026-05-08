@@ -1,9 +1,9 @@
 #pragma once
 
 #include <map>
-#include <unordered_set>
 #include <unordered_map>
 #include "Order.hpp"
+#include "SecurityReference.hpp"
 #include "Utils.hpp"
 #include <list>
 
@@ -27,6 +27,7 @@ private:
 
 public:
   std::string symbol;
+  SecurityReference sec_ref_data;
 
   std::map<double, std::list<Order>, std::greater<double>> bids;
   std::map<double, std::list<Order>, std::less<double>> asks;
@@ -52,7 +53,7 @@ public:
   }
   order_execution_result_t addOrder(Order& order);
   Order&                   getOrder(const u32 order_id) const;
-  order_execution_result_t executeOrder(Order& newOrder);
+  order_execution_result_t executeOrder(Order& new_order);
   void                     removeOrder(const u32 order_id, Side side);
   u32                      getNumOrders(const Side side) const;
 };

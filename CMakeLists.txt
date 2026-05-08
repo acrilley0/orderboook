@@ -60,6 +60,7 @@ FetchContent_Declare(
   GIT_TAG        7.10.0
   GIT_SHALLOW    TRUE
   EXCLUDE_FROM_ALL
+  SYSTEM
 )
 FetchContent_MakeAvailable(libpqxx)
 

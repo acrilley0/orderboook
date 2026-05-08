@@ -1,4 +1,5 @@
 #include "UserInterface.hpp"
+#include "OrderBookManager.hpp"
 #include "Utils.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/component_base.hpp>

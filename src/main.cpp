@@ -6,13 +6,13 @@
 
 int main()
 {
-  OrderBookManager bookManager = OrderBookManager();
+  OrderBookManager book_manager = OrderBookManager();
   auto conn = SecurityReference::InitConnection();
-  SecurityReference::InitTable(conn);
+  SecurityReference::initTable(conn);
   const std::string path_to_symbols = "./symbols.json";
-  uint32_t num_symbols = SecurityReference::ReadSymbolsJSON(path_to_symbols, conn, bookManager);
+  uint32_t num_symbols = SecurityReference::readSymbolsJSON(path_to_symbols, conn, book_manager);
 
-  std::vector<std::string> symbol_list = bookManager.getSymbols();
+  std::vector<std::string> symbol_list = book_manager.getSymbols();
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
@@ -23,7 +23,7 @@ int main()
   // Page 1: Create Book
   std::string symbol;
   modal_info_t modal_info;
-  auto create_book_page = UserInterface::createBookPage(bookManager,
+  auto create_book_page = UserInterface::createBookPage(book_manager,
                                                         symbol,
                                                         symbol_list,
                                                         modal_info);
@@ -38,7 +38,7 @@ int main()
   std::string price;
   std::string qty;
 
-  auto add_order_page = UserInterface::addOrderPage(bookManager,
+  auto add_order_page = UserInterface::addOrderPage(book_manager,
                                                     symbol,
                                                     price,
                                                     qty,
@@ -62,7 +62,7 @@ int main()
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(false, "Failed to add the order!"), &modal_info.order_add_failure_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was partially filled!"), &modal_info.order_partially_filled_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was totally filled!"), &modal_info.order_filled_modal_shown);
-  tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(bookManager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(book_manager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
 
   auto final_container = ftxui::CatchEvent(tabs_with_modals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
