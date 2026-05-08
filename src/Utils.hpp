@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <pqxx/pqxx>
+#include <nlohmann/json.hpp>
 
 using i32  = int32_t;
 using i64  = int64_t;
@@ -49,4 +50,4 @@ const std::vector<std::string> sides = {"BID", "ASK"};
 std::string trim(const std::string& str);
 bool isEmptyOrWhitespace(const std::string& str);
 u64 getCurrentTime();
-bool tableExists(pqxx::connection &c, const std::string& table_name);
+bool tableExists(std::unique_ptr<pqxx::connection>& c, const std::string& table_name);

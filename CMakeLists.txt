@@ -63,11 +63,18 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libpqxx)
 
+FetchContent_Declare(
+  json
+  URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
 target_link_libraries(orderbook
   PRIVATE ftxui::screen
   PRIVATE ftxui::dom
   PRIVATE ftxui::component
   PRIVATE libpqxx::pqxx
+  PRIVATE nlohmann_json::nlohmann_json
 )
 
 # --- Test Configuration --------------------------------------------------------
@@ -89,6 +96,7 @@ set_target_properties(orderbook_tests PROPERTIES
 target_link_libraries(orderbook_tests
   PRIVATE GTest::gtest_main
   PRIVATE libpqxx::pqxx
+  PRIVATE nlohmann_json::nlohmann_json
 )
 
 gtest_discover_tests(orderbook_tests)

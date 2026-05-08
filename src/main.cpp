@@ -6,15 +6,18 @@
 
 int main()
 {
-  SecurityReference::InitTable();
-
   OrderBookManager bookManager = OrderBookManager();
+  auto conn = SecurityReference::InitConnection();
+  SecurityReference::InitTable(conn);
+  const std::string path_to_symbols = "./symbols.json";
+  uint32_t num_symbols = SecurityReference::ReadSymbolsJSON(path_to_symbols, conn, bookManager);
+
+  std::vector<std::string> symbol_list = bookManager.getSymbols();
 
   auto screen = ftxui::ScreenInteractive::TerminalOutput();
 
   int current_page = static_cast<int>(Page::MAIN_MENU);
   int menu_option_selected = 0;
-  std::vector<std::string> symbol_list;
   auto main_menu = UserInterface::createMainMenu(current_page, menu_option_selected);
 
   // Page 1: Create Book

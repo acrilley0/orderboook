@@ -26,8 +26,8 @@ u64 getCurrentTime()
   return time_ms;
 }
 
-bool tableExists(pqxx::connection &c, const std::string &table_name) {
-  pqxx::nontransaction tx(c); // Read only transaction
+bool tableExists(std::unique_ptr<pqxx::connection>& c, const std::string &table_name) {
+  pqxx::nontransaction tx(*c.get()); // Read only transaction
 
   std::string query =
     "SELECT EXISTS ("
