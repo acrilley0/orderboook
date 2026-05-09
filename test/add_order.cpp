@@ -37,5 +37,5 @@ TEST(OrderTests, ExecuteOrderTest) {
   OrderBookManager book_manager = OrderBookManager();
   book_manager.initBook(symbol);
  
-  OrderBook* book = book_manager.getBook(symbol);
+  [[maybe_unused]] OrderBook* book = book_manager.getBook(symbol);
 }

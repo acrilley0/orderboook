@@ -1,37 +1,32 @@
 #include "SecurityReference.hpp"
 #include "OrderBookManager.hpp"
-#include <print>
-#include <fstream>
+#include "Utils.hpp"
 #include <string_view>
 
-std::ofstream out("psql_db_log.txt");
-
 std::unique_ptr<pqxx::connection> SecurityReference::initConnection() { // FIXME: We should not coredump if we can't connect to the db for whatever reason
-  const std::string conn_str = "user=postgres password=root host=localhost port=5432 dbname=security_reference_data";
-  std::unique_ptr<pqxx::connection> c = std::make_unique<pqxx::connection>(conn_str);
-  if (!c->is_open()) {
-    std::println(out, "Error opening a connection to the database");
-  }
+  try {
+    const std::string conn_str = "user=postgres password=root host=localhost port=5432 dbname=security_reference_data";
+    std::unique_ptr<pqxx::connection> c = std::make_unique<pqxx::connection>(conn_str);
+    INFO_LOG("Successfully connected to security reference database");
 
-  return c;
+    return c;
+  } catch(pqxx::broken_connection& error) {
+    ERROR_LOG("Failed to connect to security reference database. Security reference data will not be available.");
+    ERROR_LOG(error.what());
+
+    return nullptr;
+  }
 }
 
 void SecurityReference::initTable(std::unique_ptr<pqxx::connection>& c) {
-  std::println(out, "Connected to database \'{}\' successfully", c->dbname());
   bool symbols_table_exists = tableExists(c, "symbols");
-
-  std::println(out, "Table exists? {}", symbols_table_exists);
 
   if (!symbols_table_exists) {
     pqxx::work w(*c.get());
     auto result = w.exec("CREATE TABLE symbols (name varchar(40), id int, MIC varchar(4), description varchar(100), AssetClass varchar(20))");
-    std::println(out, "created table symbols");
     w.commit();
   } else {
-    std::println(out, "symbols table has already been created!");
   }
-
-  out.close();
 }
 
 u32 SecurityReference::readSymbolsJSON(const std::string& path,
@@ -68,11 +63,7 @@ u32 SecurityReference::readSymbolsJSON(const std::string& path,
       num_symbols_read++;
     }
   } catch (nlohmann::json_abi_v3_12_0::detail::parse_error& error) {
-    std::println(out, "Error parsing {} -- security reference data will not be available.", path);
-    std::println(out, "{}", error.what());
   }
-
-  out.close();
 
   return num_symbols_read;
 }

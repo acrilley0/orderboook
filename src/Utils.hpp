@@ -1,16 +1,30 @@
 #pragma once
 
-#include <stdint.h>
 #include <string>
 #include <vector>
 #include <pqxx/pqxx>
 #include <nlohmann/json.hpp>
+
+
+#ifndef _DEBUG
+  #include <fstream>
+  inline std::ofstream log_file("debug.log");
+
+  #define INFO_LOG(log_statement) std::println(log_file, "\033[32m[INFO]\033[0m -- {}", log_statement);
+  #define WARNING_LOG(x) std::println(log_file, "\033[33m[WARNING]\033[0m -- {}", x);
+  #define ERROR_LOG(x) std::println(log_file, "\033[31m[ERROR]\033[0m -- {}", x);
+#else
+  #define INFO_LOG(x)
+  #define WARNING_LOG(x)
+  #define ERROR_LOG(x)
+#endif
 
 using i32  = int32_t;
 using i64  = int64_t;
 using u8   = uint8_t;
 using u32  = uint32_t;
 using u64  = uint64_t;
+using f64  = double;
 
 struct modal_info_t {
   bool inserted; // Indicates whether an order was inserted in the globalOrderIndex
@@ -47,7 +61,7 @@ typedef enum {
 
 const std::vector<std::string> sides = {"BID", "ASK"};
 
-std::string trim(const std::string& str);
-bool isEmptyOrWhitespace(const std::string& str);
+std::string trim(std::string_view str);
+bool isEmptyOrWhitespace(std::string_view str);
 u64 getCurrentTime();
-bool tableExists(std::unique_ptr<pqxx::connection>& c, const std::string& table_name);
+bool tableExists(std::unique_ptr<pqxx::connection>& c, std::string_view table_name);

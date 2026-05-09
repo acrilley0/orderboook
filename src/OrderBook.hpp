@@ -29,8 +29,8 @@ public:
   std::string symbol;
   SecurityReference sec_ref_data;
 
-  std::map<double, std::list<Order>, std::greater<double>> bids;
-  std::map<double, std::list<Order>, std::less<double>> asks;
+  std::map<f64, std::list<Order>, std::greater<double>> bids;
+  std::map<f64, std::list<Order>, std::less<double>> asks;
   std::unordered_map<u32, std::list<Order>::iterator> order_index;
 
   typedef enum {

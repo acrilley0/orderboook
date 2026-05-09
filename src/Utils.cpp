@@ -1,7 +1,6 @@
 #include "Utils.hpp"
 
-std::string trim(const std::string& str)
-{
+std::string trim(std::string_view str) {
   auto start = std::ranges::find_if_not(str.begin(), str.end(), ::isspace);
   if (start == str.end()) {
     return "";
@@ -12,13 +11,11 @@ std::string trim(const std::string& str)
   return std::string(start, end);
 }
 
-bool isEmptyOrWhitespace(const std::string& str)
-{
+bool isEmptyOrWhitespace(std::string_view str) {
   return trim(str).empty();
 }
 
-u64 getCurrentTime()
-{
+u64 getCurrentTime() {
   auto time = std::chrono::system_clock::now();
   auto dur = time.time_since_epoch();
   auto time_ms = dur.count();
@@ -26,7 +23,7 @@ u64 getCurrentTime()
   return time_ms;
 }
 
-bool tableExists(std::unique_ptr<pqxx::connection>& c, const std::string &table_name) {
+bool tableExists(std::unique_ptr<pqxx::connection>& c, std::string_view table_name) {
   pqxx::nontransaction tx(*c.get()); // Read only transaction
 
   std::string query =

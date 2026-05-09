@@ -2,15 +2,19 @@
 #include "Utils.hpp"
 #include "SecurityReference.hpp"
 #include <cstdlib>
+#include <ftxui/component/screen_interactive.hpp>
 #include <memory>
+
+#define PATH_TO_SYMBOLS "./symbols.json"
 
 int main()
 {
   OrderBookManager book_manager = OrderBookManager();
   auto conn = SecurityReference::initConnection();
-  SecurityReference::initTable(conn);
-  const std::string path_to_symbols = "./symbols.json";
-  uint32_t num_symbols = SecurityReference::readSymbolsJSON(path_to_symbols, conn, book_manager);
+  if (conn != nullptr) {
+    SecurityReference::initTable(conn);
+    [[maybe_unused]] u32 num_symbols = SecurityReference::readSymbolsJSON(PATH_TO_SYMBOLS, conn, book_manager);
+  }
 
   std::vector<std::string> symbol_list = book_manager.getSymbols();
 

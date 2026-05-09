@@ -12,7 +12,7 @@ class Order {
 public:
   u32          order_id;
   u32          quantity;
-  double       price;
+  f64          price;
   u64          timestamp;
   Side         side;
   std::string symbol;
@@ -20,7 +20,7 @@ public:
 
   Order(u32 order_id,
         u32 quantity,
-        double price,
+        f64 price,
         u64 timestamp,
         Side side,
         std::string symbol) :
