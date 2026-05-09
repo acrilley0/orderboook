@@ -10,7 +10,7 @@ private:
   std::unordered_map<std::string, std::unique_ptr<OrderBook>> books;
 
 public:
-  bool initBook(const std::string& symbol);
+  bool initBook(std::string_view symbol);
   OrderBook* getBook(const std::string& symbol) const;
   size_t getNumBooks() const;
   std::vector<std::string> getSymbols() const;

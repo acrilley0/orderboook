@@ -7,7 +7,7 @@
 int main()
 {
   OrderBookManager book_manager = OrderBookManager();
-  auto conn = SecurityReference::InitConnection();
+  auto conn = SecurityReference::initConnection();
   SecurityReference::initTable(conn);
   const std::string path_to_symbols = "./symbols.json";
   uint32_t num_symbols = SecurityReference::readSymbolsJSON(path_to_symbols, conn, book_manager);

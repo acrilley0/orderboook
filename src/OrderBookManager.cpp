@@ -1,6 +1,6 @@
 #include "OrderBookManager.hpp"
 
-bool OrderBookManager::initBook(const std::string& symbol)
+bool OrderBookManager::initBook(std::string_view symbol)
 {
   if (symbol.size() == 0)
     return false;

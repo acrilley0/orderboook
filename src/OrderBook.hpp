@@ -40,7 +40,7 @@ public:
     ORDER_PARTIAL_FILL,
   } order_execution_result_t; // FIXME: Do I actually want this to be part of the OrderBook class?
 
-  OrderBook(std::string symbol) {
+  OrderBook(std::string_view symbol) {
     this->symbol = symbol;
     bids = {};
     asks = {};
