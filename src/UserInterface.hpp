@@ -37,24 +37,24 @@ const std::vector<std::string> options = {
 
 class UserInterface {
 public:
-  static ftxui::Component createMainMenu(int& currentPage,
-                                         int& menuOptionSelected);
-  static ftxui::Component createBookPage(OrderBookManager& bookManager,
+  static ftxui::Component createMainMenu(int& current_page,
+                                         int& menu_option_selected);
+  static ftxui::Component createBookPage(OrderBookManager& book_manager,
                                          std::string& symbol,
-                                         std::vector<std::string>& symbolList,
+                                         std::vector<std::string>& symbol_list,
                                          modal_info_t& modal_info);
   static ftxui::Component listBooksPage(std::vector<std::string>& symbols);
-  static ftxui::Component addOrderPage(OrderBookManager& bookManager,
+  static ftxui::Component addOrderPage(OrderBookManager& book_manager,
                                        std::string& symbol,
-                                       std::string& priceStr,
-                                       std::string& quantityStr,
+                                       std::string& price_str,
+                                       std::string& quantity_str,
                                        const std::vector<std::string>& sides,
                                        modal_info_t& modal_info);
-  static ftxui::Component printBookInfoModal(OrderBookManager& bookManager,
-                                             const std::vector<std::string>& symboLlist,
-                                             int& symboLIndex);
-  static ftxui::Component displayBookPage(std::vector<std::string>& symbolList,
-                                          int& selectedSymbol,
+  static ftxui::Component printBookInfoModal(OrderBookManager& book_manager,
+                                             const std::vector<std::string>& symbol_list,
+                                             int& symbol_index);
+  static ftxui::Component displayBookPage(std::vector<std::string>& symbol_list,
+                                          int& selected_symbol,
                                           modal_info_t& modal_info);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
