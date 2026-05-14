@@ -23,7 +23,7 @@ enum class Page {
   CREATE_BOOK_PAGE,
   LIST_BOOKS_PAGE,
   ADD_ORDER_PAGE,
-  DISPLAY_REF_DATA,
+  DISPLAY_REF_DATA_PAGE,
   DISPLAY_BOOK_PAGE,
 };
 
@@ -53,14 +53,12 @@ public:
   static ftxui::Component printBookInfoModal(OrderBookManager& book_manager,
                                              const std::vector<std::string>& symbol_list,
                                              int& symbol_index);
-  static ftxui::Component displayBookPage(std::vector<std::string>& symbol_list,
-                                          int& selected_symbol,
-                                          modal_info_t& modal_info);
   static ftxui::Component printSecRefModal(OrderBookManager& book_manager,
                                            const std::vector<std::string>& symbol_list,
                                            int& symbol_index);
-  static ftxui::Component displaySecRefPage(std::vector<std::string>& symbol_list,
+  static ftxui::Component displaySymbolList(std::vector<std::string>& symbol_list,
                                             int& selected_symbol,
-                                            modal_info_t& modal_info);
+                                            modal_info_t& modal_info,
+                                            int& menu_option_selected);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };

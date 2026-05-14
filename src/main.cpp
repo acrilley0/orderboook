@@ -52,17 +52,11 @@ int main()
 
   // Page 4: Display Security Reference Data Page
   int selected_symbol = 0;
-  auto sec_ref_data_page = UserInterface::displaySecRefPage(symbol_list,
-                                                            selected_symbol,
-                                                            modal_info);
-  tabs.push_back(sec_ref_data_page);
-
-  // Page 5: Display Book Page
-  bool display_book_info_modal = false;
-  auto display_book_page = UserInterface::displayBookPage(symbol_list,
-                                                          selected_symbol,
-                                                          modal_info);
-  tabs.push_back(display_book_page);
+  auto symbol_list_page = UserInterface::displaySymbolList(symbol_list,
+                                                           selected_symbol,
+                                                           modal_info,
+                                                           menu_option_selected); // FIXME: This doesn't work because current_page is stuck at 0
+  tabs.push_back(symbol_list_page);
 
   auto all_tabs = ftxui::Container::Tab(tabs, &current_page);
   auto tabs_with_modals = all_tabs;
@@ -84,8 +78,7 @@ int main()
       !modal_info.order_partially_filled_modal_shown &&
       !modal_info.order_filled_modal_shown &&
       !modal_info.book_info_modal_shown &&
-      !modal_info.sec_ref_data_modal_shown &&
-      !display_book_info_modal) {
+      !modal_info.sec_ref_data_modal_shown) {
       current_page = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
     }

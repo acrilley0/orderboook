@@ -35,12 +35,9 @@ ftxui::Component UserInterface::createMainMenu(int& current_page, int& menu_opti
         current_page = static_cast<int>(Page::ADD_ORDER_PAGE);
         break;
       }
+      case static_cast<int>(Action::DISPLAY_BOOK):
       case static_cast<int>(Action::DISPLAY_REF_DATA): {
-        current_page = static_cast<int>(Page::DISPLAY_REF_DATA);
-        break;
-      }
-      case static_cast<int>(Action::DISPLAY_BOOK): {
-        current_page = static_cast<int>(Page::DISPLAY_BOOK_PAGE);
+        current_page = static_cast<int>(Page::DISPLAY_REF_DATA_PAGE);
         break;
       }
     }
@@ -265,49 +262,25 @@ ftxui::Component UserInterface::printBookInfoModal(OrderBookManager& book_manage
   return bookInfoRenderer;
 }
 
-ftxui::Component UserInterface::displayBookPage(std::vector<std::string>& symbol_list,
-                                                int& selected_symbol,
-                                                modal_info_t& modal_info)
-{
-  ftxui::MenuOption menu_options = {
-    ftxui::MenuOption::Vertical(),
-  };
-  menu_options.on_enter = [&] {
-    modal_info.current_symbol_for_modal = symbol_list[selected_symbol];
-    modal_info.book_info_modal_shown = true;
-  };
-
-  auto list = ftxui::Menu(&symbol_list, &selected_symbol, menu_options);
-  auto symbolSelectContainer = ftxui::Container::Vertical({
-    ftxui::Renderer([&symbol_list] {
-      if (symbol_list.empty()) {
-        return ftxui::text("There are currently no OrderBooks!") | ftxui::border | ftxui::color(ftxui::Color::Yellow) | ftxui::center;
-      } else {
-        return ftxui::vbox({
-          ftxui::text("Choose symbol to display Orders:"),
-          ftxui::separator(),
-        });
-      }
-    }),
-    list,
-  });
-  symbolSelectContainer->SetActiveChild(list);
-
-  return symbolSelectContainer | STYLE;
-}
-
-ftxui::Component UserInterface::displaySecRefPage(std::vector<std::string>& symbol_list,
+ftxui::Component UserInterface::displaySymbolList(std::vector<std::string>& symbol_list,
                                                   int& selected_symbol,
-                                                  modal_info_t& modal_info) {
-  // FIXME: This is pretty much identical to the displayBookPage...
-  // I think we can show the same page in either case and then route
-  // to print the proper modal based on which option was selected
+                                                  modal_info_t& modal_info,
+                                                  int& menu_option_selected) {
   ftxui::MenuOption menu_options = {
     ftxui::MenuOption::Vertical(),
   };
-  menu_options.on_enter = [&] {
+  menu_options.on_enter = [&symbol_list, &selected_symbol, &modal_info, &menu_option_selected] {
     modal_info.current_symbol_for_modal = symbol_list[selected_symbol];
-    modal_info.sec_ref_data_modal_shown = true;
+    switch ((Action)menu_option_selected) {
+      case (Action::DISPLAY_REF_DATA):
+        modal_info.sec_ref_data_modal_shown = true;
+        break;
+      case (Action::DISPLAY_BOOK):
+        modal_info.book_info_modal_shown = true;
+        break;
+      default:
+        WARNING_LOG("GOT UNEXPECTED ACTION");
+    }
   };
 
   auto list = ftxui::Menu(&symbol_list, &selected_symbol, menu_options);
