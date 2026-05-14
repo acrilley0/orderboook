@@ -38,6 +38,7 @@ struct modal_info_t {
   bool order_filled_modal_shown;
   bool order_partially_filled_modal_shown;
   bool book_info_modal_shown;
+  bool sec_ref_data_modal_shown;
   std::string current_symbol_for_modal; // Tracks which symbol book info (bids and asks) should be displayed for
 
   modal_info_t() {
@@ -50,6 +51,7 @@ struct modal_info_t {
     order_filled_modal_shown = false;
     order_partially_filled_modal_shown = false;
     book_info_modal_shown = false;
+    sec_ref_data_modal_shown = false;
     current_symbol_for_modal = "";
   }
 };

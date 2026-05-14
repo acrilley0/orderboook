@@ -8,10 +8,10 @@ class OrderBookManager;
 
 class SecurityReference {
 public:
-  typedef enum {
+  enum class AssetClass {
     NONE = 0,
     US_EQUITIES = 1,
-  } AssetClass;
+  }; // TODO: This should have some kind of tostring func so that it can be represented in the Security Reference Data screen
 
   u32 security_id;
   std::string mic;
@@ -22,7 +22,7 @@ public:
     security_id(0),
     mic(""),
     description(""),
-    asset_class(NONE)
+    asset_class(AssetClass::NONE)
   {}
 
   SecurityReference(u32 security_id, std::string mic, std::string description, AssetClass asset_class) :

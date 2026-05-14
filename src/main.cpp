@@ -50,8 +50,14 @@ int main()
                                                     modal_info);
   tabs.push_back(add_order_page);
 
-  // Page 5: Display Book Page
+  // Page 4: Display Security Reference Data Page
   int selected_symbol = 0;
+  auto sec_ref_data_page = UserInterface::displaySecRefPage(symbol_list,
+                                                            selected_symbol,
+                                                            modal_info);
+  tabs.push_back(sec_ref_data_page);
+
+  // Page 5: Display Book Page
   bool display_book_info_modal = false;
   auto display_book_page = UserInterface::displayBookPage(symbol_list,
                                                           selected_symbol,
@@ -67,6 +73,7 @@ int main()
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was partially filled!"), &modal_info.order_partially_filled_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::createResultModal(true, "Your order was totally filled!"), &modal_info.order_filled_modal_shown);
   tabs_with_modals |= ftxui::Modal(UserInterface::printBookInfoModal(book_manager, symbol_list, selected_symbol), &modal_info.book_info_modal_shown);
+  tabs_with_modals |= ftxui::Modal(UserInterface::printSecRefModal(book_manager, symbol_list, selected_symbol), &modal_info.sec_ref_data_modal_shown);
 
   auto final_container = ftxui::CatchEvent(tabs_with_modals, [&](ftxui::Event event) {
     if (event == ftxui::Event::Escape &&
@@ -77,6 +84,7 @@ int main()
       !modal_info.order_partially_filled_modal_shown &&
       !modal_info.order_filled_modal_shown &&
       !modal_info.book_info_modal_shown &&
+      !modal_info.sec_ref_data_modal_shown &&
       !display_book_info_modal) {
       current_page = static_cast<int>(Page::MAIN_MENU); // Return to main menu
       return true;
@@ -111,6 +119,10 @@ int main()
       }
       if (modal_info.book_info_modal_shown) {
         modal_info.book_info_modal_shown = false;
+        return true;
+      }
+      if (modal_info.sec_ref_data_modal_shown) {
+        modal_info.sec_ref_data_modal_shown = false;
         return true;
       }
       return false;

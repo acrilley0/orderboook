@@ -58,11 +58,12 @@ u32 SecurityReference::readSymbolsJSON(const std::string& path,
       book->sec_ref_data.security_id = (*it)["id"];
       book->sec_ref_data.mic = (*it)["mic"];
       book->sec_ref_data.description = (*it)["description"];
-      book->sec_ref_data.asset_class = (*it)["assetClass"];
+      book->sec_ref_data.asset_class = (*it)["asset_class"];
 
       num_symbols_read++;
     }
   } catch (nlohmann::json_abi_v3_12_0::detail::parse_error& error) {
+    ERROR_LOG("Security reference file not found!");
   }
 
   return num_symbols_read;

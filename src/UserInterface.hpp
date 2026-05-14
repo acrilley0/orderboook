@@ -14,7 +14,7 @@ enum class Action {
   CREATE_BOOK,
   LIST_BOOKS,
   ADD_ORDER,
-  MODIFY_ORDER,
+  DISPLAY_REF_DATA,
   DISPLAY_BOOK,
 };
 
@@ -23,15 +23,15 @@ enum class Page {
   CREATE_BOOK_PAGE,
   LIST_BOOKS_PAGE,
   ADD_ORDER_PAGE,
+  DISPLAY_REF_DATA,
   DISPLAY_BOOK_PAGE,
-  MODIFY_ORDER_PAGE,
 };
 
 const std::vector<std::string> options = {
   "1. Create an OrderBook",
   "2. List symbols that currently have OrderBooks",
   "3. Add an Order to an OrderBook",
-  "4. Modify existing order",
+  "4. Display security reference data",
   "5. Display an order book",
 };
 
@@ -56,5 +56,11 @@ public:
   static ftxui::Component displayBookPage(std::vector<std::string>& symbol_list,
                                           int& selected_symbol,
                                           modal_info_t& modal_info);
+  static ftxui::Component printSecRefModal(OrderBookManager& book_manager,
+                                           const std::vector<std::string>& symbol_list,
+                                           int& symbol_index);
+  static ftxui::Component displaySecRefPage(std::vector<std::string>& symbol_list,
+                                            int& selected_symbol,
+                                            modal_info_t& modal_info);
   static ftxui::Component createResultModal(bool result, const std::string& message);
 };
